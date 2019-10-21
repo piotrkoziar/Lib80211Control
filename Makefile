@@ -15,10 +15,15 @@ LIBS += -lnl-genl-3
 LIBS += $(shell $(PKG_CONFIG) --libs $(NLLIBNAME))
 
 # dependencies (header files)
-DEPS1 =
+DEPS1 := \
+mynl.h \
+GenericNetlinkMessage.h \
+Attributes.h
 
 # objects we want to build
-OBJS1 := mynl.o
+OBJS1 := \
+mynl.o \
+GenericNetlinkMessage.o
 
 #
 TARGET1 = mynl

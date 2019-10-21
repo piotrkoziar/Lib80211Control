@@ -1,25 +1,16 @@
 
-#include <net/if.h>
-#include <netlink/socket.h>
-#include <netlink/netlink.h>
-#include <netlink/genl/genl.h>
-#include <netlink/genl/ctrl.h>
-#include <netlink/msg.h>
-#include <netlink/attr.h>
+#include "mynl.h"
+#include "GenericNetlinkMessage.h"
 
-#include <linux/nl80211.h>
+/* Modifiers to GET request */
+// #define NLM_F_ROOT	0x100	/* specify tree	root	*/
+// #define NLM_F_MATCH	0x200	/* return all matching	*/
+// #define NLM_F_ATOMIC	0x400	/* atomic GET		*/
+// #define NLM_F_DUMP	(NLM_F_ROOT|NLM_F_MATCH)
 
 #define COMMAND_NAME_MAX_LEN 10
 
-#define NLM_F_ROOT	0x100
-#define NLM_F_MATCH	0x200
-#define NLM_F_DUMP	(NLM_F_ROOT|NLM_F_MATCH)
-
-typedef struct nl_sock 		  nl_sock_t;
-typedef struct nl_msg  		  nl_msg_t;
-typedef struct nl_cb   		  nl_cb_t;
-typedef enum nl80211_commands nl80211_cmd_t;
-typedef enum nl80211_attrs	  nl80211_attr_t;
+using namespace genericnetlink;
 
 /**************************************************************************************************************/
 /* Helpers */
@@ -143,6 +134,19 @@ char *channel_width_name(enum nl80211_chan_width width)
 /* Handlers */
 /**************************************************************************************************************/
 
+
+static int print_wiphy(struct nl_msg * msg, void *arg)
+{
+	Message genlmsg(msg);
+	Wiphy wiphy;
+
+	wiphy = genlmsg.get_attr_wiphy();
+	printf("Wiphy (%d)%s\n", wiphy.id, wiphy.name);
+
+	return NL_SKIP;
+}
+
+
 static int print_iface_handler(struct nl_msg *msg, void *arg)
 {
 	struct genlmsghdr *gnlh = (struct genlmsghdr *)nlmsg_data(nlmsg_hdr(msg));
@@ -232,7 +236,7 @@ static int print_iface_handler(struct nl_msg *msg, void *arg)
 	return NL_SKIP;
 }
 
-static int  (*get_iface_handler)(struct nl_msg *, void *) = print_iface_handler;
+static int  (*get_iface_handler)(struct nl_msg *, void *) = print_wiphy;//print_iface_handler;
 static int   iface_handler_data						      = -1;
 static void  *get_iface_handler_data					  = &iface_handler_data;
 
@@ -346,7 +350,7 @@ int main(int argc, char ** argv)
 
 	// Prepare header values
 
-	int 		  message_flags = NLM_F_DUMP;
+	int 		  message_flags = NLM_F_MATCH;
 	nl80211_cmd_t command		= NL80211_CMD_GET_WIPHY;
 
 	// Fill and add the header to the message
@@ -400,4 +404,3 @@ nla_put_failure:
 	fprintf(stderr, "building message failed\n");
 	return 0;
 }
-
