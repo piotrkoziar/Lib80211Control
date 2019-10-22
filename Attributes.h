@@ -3,11 +3,17 @@
 
 #include <stdint.h>
 
-class Wiphy
-{
+class Wiphy {
 public:
 	uint32_t   id;
 	char     * name;
 };
+
+class Interface {
+public:
+	uint32_t   index;
+	char 	 * name;
+};
+
 
 #endif // defined __Wiphy__

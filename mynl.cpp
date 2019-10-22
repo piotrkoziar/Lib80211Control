@@ -1,6 +1,7 @@
 
 #include "mynl.h"
 #include "GenericNetlinkMessage.h"
+#include "Attributes.h"
 
 /* Modifiers to GET request */
 // #define NLM_F_ROOT	0x100	/* specify tree	root	*/
@@ -134,103 +135,15 @@ char *channel_width_name(enum nl80211_chan_width width)
 /* Handlers */
 /**************************************************************************************************************/
 
-
 static int print_wiphy(struct nl_msg * msg, void *arg)
 {
 	Message genlmsg(msg);
-	Wiphy wiphy;
 
-	wiphy = genlmsg.get_attr_wiphy();
-	printf("Wiphy (%d)%s\n", wiphy.id, wiphy.name);
+	char * iface_name;
 
-	return NL_SKIP;
-}
-
-
-static int print_iface_handler(struct nl_msg *msg, void *arg)
-{
-	struct genlmsghdr *gnlh = (struct genlmsghdr *)nlmsg_data(nlmsg_hdr(msg));
-	struct nlattr *tb_msg[NL80211_ATTR_MAX + 1];
-	unsigned int *wiphy = (unsigned int *)arg;
-	const char *indent = "";
-
-	nla_parse(tb_msg, NL80211_ATTR_MAX, genlmsg_attrdata(gnlh, 0),
-		  genlmsg_attrlen(gnlh, 0), NULL);
-
-	if (wiphy && tb_msg[NL80211_ATTR_WIPHY]) {
-		unsigned int thiswiphy = nla_get_u32(tb_msg[NL80211_ATTR_WIPHY]);
-		indent = "\t";
-		if (*wiphy != thiswiphy)
-			printf("phy#%d\n", thiswiphy);
-		*wiphy = thiswiphy;
-	}
-
-	if (tb_msg[NL80211_ATTR_IFNAME])
-		printf("%sInterface %s\n", indent, nla_get_string(tb_msg[NL80211_ATTR_IFNAME]));
-	else
-		printf("%sUnnamed/non-netdev interface\n", indent);
-	if (tb_msg[NL80211_ATTR_IFINDEX])
-		printf("%s\tifindex %d\n", indent, nla_get_u32(tb_msg[NL80211_ATTR_IFINDEX]));
-	if (tb_msg[NL80211_ATTR_WDEV])
-		printf("%s\twdev 0x%llx\n", indent,
-		       (unsigned long long)nla_get_u64(tb_msg[NL80211_ATTR_WDEV]));
-	if (tb_msg[NL80211_ATTR_MAC]) {
-		char mac_addr[20];
-		mac_addr_n2a(mac_addr, (const unsigned char *)nla_data(tb_msg[NL80211_ATTR_MAC]));
-		printf("%s\taddr %s\n", indent, mac_addr);
-	}
-	if (tb_msg[NL80211_ATTR_SSID]) {
-		printf("%s\tssid ", indent);
-		print_ssid_escaped(nla_len(tb_msg[NL80211_ATTR_SSID]),
-				   (const uint8_t *)nla_data(tb_msg[NL80211_ATTR_SSID]));
-		printf("\n");
-	}
-	if (tb_msg[NL80211_ATTR_IFTYPE])
-		printf("%s\ttype %s\n", indent, iftype_name((nl80211_iftype)nla_get_u32(tb_msg[NL80211_ATTR_IFTYPE])));
-	if (!wiphy && tb_msg[NL80211_ATTR_WIPHY])
-		printf("%s\twiphy %d\n", indent, nla_get_u32(tb_msg[NL80211_ATTR_WIPHY]));
-	if (tb_msg[NL80211_ATTR_WIPHY_FREQ]) {
-		uint32_t freq = nla_get_u32(tb_msg[NL80211_ATTR_WIPHY_FREQ]);
-
-		printf("%s\tchannel %d (%d MHz)", indent,
-		       ieee80211_frequency_to_channel(freq), freq);
-
-		if (tb_msg[NL80211_ATTR_CHANNEL_WIDTH]) {
-			printf(", width: %s",
-				channel_width_name((nl80211_chan_width)nla_get_u32(tb_msg[NL80211_ATTR_CHANNEL_WIDTH])));
-			if (tb_msg[NL80211_ATTR_CENTER_FREQ1])
-				printf(", center1: %d MHz",
-					nla_get_u32(tb_msg[NL80211_ATTR_CENTER_FREQ1]));
-			if (tb_msg[NL80211_ATTR_CENTER_FREQ2])
-				printf(", center2: %d MHz",
-					nla_get_u32(tb_msg[NL80211_ATTR_CENTER_FREQ2]));
-		} else if (tb_msg[NL80211_ATTR_WIPHY_CHANNEL_TYPE]) {
-			enum nl80211_channel_type channel_type;
-
-			channel_type = (nl80211_channel_type)nla_get_u32(tb_msg[NL80211_ATTR_WIPHY_CHANNEL_TYPE]);
-			printf(" %s", channel_type_name(channel_type));
-		}
-
-		printf("\n");
-	}
-
-	if (tb_msg[NL80211_ATTR_WIPHY_TX_POWER_LEVEL]) {
-		uint32_t txp = nla_get_u32(tb_msg[NL80211_ATTR_WIPHY_TX_POWER_LEVEL]);
-
-		printf("%s\ttxpower %d.%.2d dBm\n",
-		       indent, txp / 100, txp % 100);
-	}
-
-	// if (tb_msg[NL80211_ATTR_TXQ_STATS]) {
-	// 	char buf[150];
-	// 	parse_txq_stats(buf, sizeof(buf), tb_msg[NL80211_ATTR_TXQ_STATS], 1, -1, indent);
-	// 	printf("%s\tmulticast TXQ:%s\n", indent, buf);
-	// }
-
-	if (tb_msg[NL80211_ATTR_4ADDR]) {
-		uint8_t use_4addr = nla_get_u8(tb_msg[NL80211_ATTR_4ADDR]);
-		if (use_4addr)
-			printf("%s\t4addr: on\n", indent);
+	if(genlmsg.get_attr(NL80211_ATTR_IFNAME, (void **)&iface_name) == GENLRET_SUCCESS)
+	{
+		printf("Iface name: %s\n", iface_name);
 	}
 
 	return NL_SKIP;
@@ -350,8 +263,8 @@ int main(int argc, char ** argv)
 
 	// Prepare header values
 
-	int 		  message_flags = NLM_F_MATCH;
-	nl80211_cmd_t command		= NL80211_CMD_GET_WIPHY;
+	int 		  message_flags = NLM_F_DUMP;
+	nl80211_cmd_t command		= NL80211_CMD_GET_INTERFACE;
 
 	// Fill and add the header to the message
 

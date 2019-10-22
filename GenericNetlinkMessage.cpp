@@ -10,23 +10,13 @@ Message::Message(nl_msg_t * msg)
 	nla_parse(attributes, NL80211_ATTR_MAX, genlmsg_attrdata(header, 0), genlmsg_attrlen(header, 0), NULL);
 }
 
-Wiphy Message::get_attr_wiphy()
+genlret_t Message::get_attr(const nl80211_attr_t attr_name, void ** attr)
 {
-	Wiphy wiphy;
-
-	if (attributes[NL80211_ATTR_WIPHY])
+	if (attributes[attr_name])
 	{
-		wiphy.id = nla_get_u32(attributes[NL80211_ATTR_WIPHY]);
-	}
-	else
-	{
-		return wiphy;
+		*attr = nla_data(attributes[attr_name]);
+		return GENLRET_SUCCESS;
 	}
 
-	if (attributes[NL80211_ATTR_WIPHY_NAME])
-	{
-		wiphy.name = nla_get_string(attributes[NL80211_ATTR_WIPHY_NAME]);
-	}
-
-	return wiphy;
+	return GENLRET_ERROR;
 }

@@ -2,7 +2,7 @@ CC ?= "gcc"
 PKG_CONFIG ?= pkg-config
 NLLIBNAME = libnl-3.0
 
-CFLAGS ?= -O2 -g
+CFLAGS ?= -O0 -g
 CFLAGS += -Wall -Wextra -Wundef -Wno-trigraphs -fno-strict-aliasing -fno-common \
 	  -Werror-implicit-function-declaration -Wsign-compare -Wno-unused-parameter
 CFLAGS += -DCONFIG_LIBNL30
