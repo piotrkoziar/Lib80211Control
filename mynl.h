@@ -1,3 +1,7 @@
+
+#ifndef __MYNL__
+#define __MYNL__
+
 #include <net/if.h>
 #include <netlink/socket.h>
 #include <netlink/netlink.h>
@@ -15,3 +19,14 @@ typedef enum nl80211_commands nl80211_cmd_t;
 typedef enum nl80211_attrs	  nl80211_attr_t;
 typedef struct genlmsghdr	  genlmsghdr_t;
 typedef struct nlattr 		  nlattr_t;
+
+namespace genericnetlink {
+
+typedef enum {
+    GENLRET_SUCCESS = 0,
+    GENLRET_ERROR   = -1,
+} genlret_t;
+
+} // namespace genericnetlink
+
+#endif // declared __MYNL__
