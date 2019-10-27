@@ -14,30 +14,28 @@ CFLAGS += -DNLDBG=4
 LIBS += -lnl-genl-3
 LIBS += $(shell $(PKG_CONFIG) --libs $(NLLIBNAME))
 
-# dependencies (header files)
-DEPS1 := \
-mynl.h \
-GenericNetlinkMessage.h \
-Attributes.h
-
-# objects we want to build
-OBJS1 := \
-mynl.o \
-GenericNetlinkMessage.o
-
 #
 TARGET1 = mynl
 
-# create objects (.o)
-%.o: %.cpp $(DEPS1)
-	$(CC) -c -o $@ $< $(CFLAGS)
+# directories
+SRCDIR = src
+OBJDIR = obj
+BINDIR = bin
 
-# build from objects
-$(TARGET1): $(OBJS1)
+INCLUDES1 := $(wildcard $(SRCDIR)/*.h)
+SOURCES1 := $(wildcard $(SRCDIR)/*.cpp)
+# OBJECTS1 := $(patsubst %.cpp, %.o, $(SOURCES1))
+OBJECTS1 := $(SOURCES1:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
+
+# rule for mynl
+$(BINDIR)/$(TARGET1): $(OBJECTS1)
+	@echo LINKER
+	@echo $(OBJECTS1)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
-clean:
-	rm -f *.o $(TARGET1)
+# rule for objects (.o)
+$(OBJECTS1):$(OBJDIR)/%.o: $(SRCDIR)/%.cpp $(INCLUDES1)
+	$(CC) -c -o $@ $< $(CFLAGS)
 
-# but you can use this as well:
-# sudo gcc mynl.cpp -o mynl $(pkg-config --cflags --libs libnl-3.0)
+clean:
+	rm -f $(OBJDIR)/*.o $(TARGET1)

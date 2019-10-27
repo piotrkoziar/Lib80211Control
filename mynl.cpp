@@ -1,7 +1,7 @@
 
 #include "mynl.h"
-#include "GenericNetlinkMessage.h"
-#include "Attributes.h"
+// #include "Message.h"
+// #include "Attributes.h"
 
 /* Modifiers to GET request */
 // #define NLM_F_ROOT	0x100	/* specify tree	root	*/
@@ -11,7 +11,7 @@
 
 #define COMMAND_NAME_MAX_LEN 10
 
-using namespace genericnetlink;
+using namespace mynl;
 
 /**************************************************************************************************************/
 /* Helpers */
@@ -137,16 +137,16 @@ char *channel_width_name(enum nl80211_chan_width width)
 
 static int print_wiphy(struct nl_msg * msg, void *arg)
 {
-	Message genlmsg(msg);
+	// Message genlmsg(msg);
 
-	char * iface_name;
+	// char * iface_name;
 
-	if(genlmsg.get_attr(NL80211_ATTR_IFNAME, (void **)&iface_name) == GENLRET_SUCCESS)
-	{
-		printf("Iface name: %s\n", iface_name);
-	}
+	// if(genlmsg.get_attr(NL80211_ATTR_IFNAME, (void **)&iface_name) == MYNL_SUCCESS)
+	// {
+	// 	printf("Iface name: %s\n", iface_name);
+	// }
 
-	return NL_SKIP;
+	// return NL_SKIP;
 }
 
 static int  (*get_iface_handler)(struct nl_msg *, void *) = print_wiphy;//print_iface_handler;
@@ -279,7 +279,7 @@ int main(int argc, char ** argv)
 
 	// Add attribute type NL80211_ATTR_IFINDEX (interface index) to the message
 
-	nl80211_attr_t attribute = NL80211_ATTR_IFINDEX;
+	nl80211_attr_type_t attribute = NL80211_ATTR_IFINDEX;
 
 	NLA_PUT_U32(p_nl_msg, attribute, device_index);
 
@@ -289,7 +289,7 @@ int main(int argc, char ** argv)
 
 	// Send message
 
-	nl_send_auto_complete(p_nl_sock, p_nl_msg);
+	nl_send_auto(p_nl_sock, p_nl_msg);
 
 	// Set up callbacks
 
