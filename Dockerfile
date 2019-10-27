@@ -8,7 +8,6 @@ RUN apt-get -y update                   && \
     apt-get -y install make             && \
     apt-get -y install pkg-config
 
-ADD Makefile /projekt/
-ADD mynl.cpp /projekt/
+# ADD buildsystem/ /projekt/
 
 WORKDIR /projekt/
