@@ -9,22 +9,19 @@
 typedef struct genlmsghdr       genlmsghdr_t;
 typedef enum   nl80211_commands nl80211_cmd_t;
 typedef struct nl_msg  		    nl_msg_t;
+typedef std::set<mynl::Attribute::attr_block_t> attr_set_t;
 
 namespace mynl {
 
 class Message {
 private:
-// TODO move to the Attribute class?
-	enum class AttributeValueType {UINT32, STRING};
-private:
-	nl_msg_t 	   * message;
-	int 	 	     message_flags;
 
-	nl80211_cmd_t     	   command;
-	nl80211_attr_type_t    attribute_type;
-	void 		   	    ** attribute_value;
-	AttributeValueType     attribute_value_type;
-	bool 		 	       valid;
+private:
+	nl_msg_t 	                   * message;
+	int 	 	                     message_flags;
+	nl80211_cmd_t     	             command;
+	attr_set_t					   * attribute_set;
+	bool 		 	       		     valid;
 public:
 	Message();
 	Message(Attribute * attr, Attribute::Command cmd, void ** arg);
@@ -34,7 +31,7 @@ private:
 	* and finds corresponding (Message::command) and (Message::attribute_type) and (Message::attribute_value_type).
 	*/
 	void command_attribute_resolve(Attribute * attr, Attribute::Command cmd);
-	void add_attribute(void);
+	void add_attribute(nl80211_attr_type_t attr_type, Attribute::AttributeValueType attr_val_type, void ** attr_value);
 
 public:
 	/* Method to get attributes from the message. */
