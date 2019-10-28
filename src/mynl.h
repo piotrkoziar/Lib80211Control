@@ -11,7 +11,8 @@
 // #include <netlink/attr.h>
 #include <linux/nl80211.h>
 
-namespace mynl {
+namespace mynl
+{
 
 typedef enum {
     MYNL_SUCCESS = 0,

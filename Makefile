@@ -1,4 +1,4 @@
-CC ?= "gcc"
+CC ?= "g++"
 PKG_CONFIG ?= pkg-config
 NLLIBNAME = libnl-3.0
 
@@ -13,6 +13,7 @@ CFLAGS += -DNLDBG=4
 
 LIBS += -lnl-genl-3
 LIBS += $(shell $(PKG_CONFIG) --libs $(NLLIBNAME))
+LIBS += -lstdc++
 
 #
 TARGET1 = mynl
@@ -38,4 +39,4 @@ $(OBJECTS1):$(OBJDIR)/%.o: $(SRCDIR)/%.cpp $(INCLUDES1)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 clean:
-	rm -f $(OBJDIR)/*.o $(TARGET1)
+	rm -f $(OBJDIR)/*.o $(BINDIR)/$(TARGET1)

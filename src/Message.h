@@ -14,6 +14,7 @@ namespace mynl {
 
 class Message {
 private:
+// TODO move to the Attribute class?
 	enum class AttributeValueType {UINT32, STRING};
 private:
 	nl_msg_t 	   * message;
