@@ -8,6 +8,4 @@ RUN apt-get -y update                   && \
     apt-get -y install make             && \
     apt-get -y install pkg-config
 
-# ADD buildsystem/ /projekt/
-
 WORKDIR /projekt/
