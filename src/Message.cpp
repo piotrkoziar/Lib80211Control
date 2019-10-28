@@ -6,7 +6,6 @@
 
 using namespace mynl;
 
-					// You can pass this values during initialization. If not, see comment to the command_resolve() in Message.h
 Message::Message()
 {
 	message = nlmsg_alloc();
@@ -29,9 +28,7 @@ Message::Message(Attribute * attr, Attribute::Command cmd, void ** arg)
             // Exceptions maybe
         }
 
-		command_attribute_resolve(attr, cmd);
-
-		attribute_value = arg;
+		prepare_message(attr, cmd, arg);
 
 	} while(0);
 }
@@ -39,18 +36,20 @@ Message::Message(Attribute * attr, Attribute::Command cmd, void ** arg)
 void Message::command_attribute_resolve(Attribute * attr, Attribute::Command cmd)
 {
 	// TODO method from the Attribute class should be called to resolve command, attribute_type, attribute_value_type
+	command    	  = attr->resolve_command(cmd);
+	attribute_set = attr->resolve_attribute_set(cmd);
 }
 
-void Message::add_attribute()
+void Message::add_attribute(nl80211_attr_type_t attr_type, Attribute::AttributeValueType attr_val_type, void ** attr_value)
 {
-	switch (attribute_value_type)
+	switch (attr_val_type)
 	{
-		case AttributeValueType::UINT32 :
-			NLA_PUT_U32(message, attribute_type, *(uint32_t *)*attribute_value);
+		case Attribute::AttributeValueType::UINT32 :
+			NLA_PUT_U32(message, attr_type, *(uint32_t *)*attr_value);
 			break;
 
-		case AttributeValueType::STRING :
-			NLA_PUT_STRING(message, attribute_type, (char *)*attribute_value);
+		case Attribute::AttributeValueType::STRING :
+			NLA_PUT_STRING(message, attr_type, (char *)*attr_value);
 			break;
 
 		default :
@@ -74,11 +73,13 @@ mynlret_t Message::get_attr(Attribute * attr)
 
 	nla_parse(attributes, NL80211_ATTR_MAX, genlmsg_attrdata(header, 0), genlmsg_attrlen(header, 0), NULL);
 
-	if (attributes[attribute_type])
-	{
-		*attribute_value = nla_data(attributes[attribute_type]);
-		return MYNL_SUCCESS;
-	}
+	// TODO set members in the Attribute class
+
+	// if (attributes[attribute_type])
+	// {
+	// 	*attribute_value = nla_data(attributes[attribute_type]);
+	// 	return MYNL_SUCCESS;
+	// }
 
 	return MYNL_ERROR;
 }
@@ -91,9 +92,11 @@ void Message::prepare_message(Attribute * attr, Attribute::Command cmd, void ** 
 	// Obtain info
 	command_attribute_resolve(attr, cmd);
 
-	attribute_value = arg;
-}
+	Attribute::attr_block_t * identifier = attr->get_identifier(arg);
 
+	// TEMPORARY
+	add_attribute(identifier->attr_type, identifier->attr_val_type, &identifier->attr_class_member);
+}
 
 mynlret_t Message::send(Socket * socket)
 {
@@ -116,7 +119,7 @@ mynlret_t Message::send(Socket * socket)
 		return MYNL_ERROR;
 	}
 
-	add_attribute();
+	// add_attribute();
 
 	if (nl_send_auto(socket->get_socket(), message) < 0)
 	{

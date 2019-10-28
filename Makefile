@@ -9,7 +9,7 @@ CFLAGS += -DCONFIG_LIBNL30
 CFLAGS += $(shell $(PKG_CONFIG) --cflags $(NLLIBNAME))
 # debug level
 # 0 [Debugging disabled] ... 5 [less important messages]
-CFLAGS += -DNLDBG=4
+CFLAGS += -DNLDBG=4 -DNLCB=debug
 
 LIBS += -lnl-genl-3
 LIBS += $(shell $(PKG_CONFIG) --libs $(NLLIBNAME))
