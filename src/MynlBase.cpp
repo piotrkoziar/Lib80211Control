@@ -9,7 +9,8 @@ public:
     void Main()
     {
         Socket sock;
-        Message msg();
+        Wiphy * wiphy = new Wiphy("phy0");
+        Message msg(wiphy, Attribute::Command::Get, NULL);
 
     }
 };

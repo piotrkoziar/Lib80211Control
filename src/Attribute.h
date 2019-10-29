@@ -70,6 +70,9 @@ public:
 	Wiphy(void);
 	Wiphy(std::string name);
 
+private:
+	void setup_maps(void);
+
 public:
 	virtual attr_block_t * get_identifier(void ** arg);
 
