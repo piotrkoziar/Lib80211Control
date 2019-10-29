@@ -10,6 +10,7 @@ nl80211_command_t Attribute::resolve_command(Command cmd) // TODO throws excepti
     try
     {
         attribute_type = command_map.at(cmd);
+        std::cout << "attribute type found\n";
     }
     catch(const std::exception& e)
     {
@@ -38,6 +39,16 @@ std::set<Attribute::attr_block_t> * Attribute::resolve_attribute_set(Command cmd
  * (more maps)
  */
 Wiphy::Wiphy()
+{
+    setup_maps();
+}
+
+Wiphy::Wiphy(std::string nm) : name(nm)
+{
+    setup_maps();
+}
+
+void Wiphy::setup_maps()
 {
     command_map =
     {
@@ -131,11 +142,6 @@ Wiphy::Wiphy()
         .attr_type         = NL80211_ATTR_WIPHY_NAME,
         .attr_val_type     = AttributeValueType::STRING,
     };
-}
-
-Wiphy::Wiphy(std::string nm) : name(nm)
-{
-    Wiphy();
 }
 
 Attribute::attr_block_t * Wiphy::get_identifier(void ** arg)

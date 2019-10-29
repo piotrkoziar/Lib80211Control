@@ -19,6 +19,9 @@ Socket::Socket()
             // Exceptions maybe
         }
 
+        int option_value = 1;
+        setsockopt(nl_socket_get_fd(socket), SOL_NETLINK, NETLINK_EXT_ACK, (void *)&option_value, sizeof(option_value));
+
         callback = nl_cb_alloc(NL_CB_DEBUG);
         if (!callback)
         {
