@@ -28,7 +28,9 @@ Message::Message(Attribute * attr, Attribute::Command cmd, void ** arg)
 {
 	Message();
 
-	prepare_message(attr, cmd, arg);
+	// TODO
+	// prepare_message(attr, cmd, arg);
+	// cannot do it here: message is not completly constructed yet
 
 }
 
@@ -39,19 +41,21 @@ void Message::command_attribute_resolve(Attribute * attr, Attribute::Command cmd
 	command    	  = attr->resolve_command(cmd);
 	std::cout << "resolve attribute set\n";
 	attribute_set = attr->resolve_attribute_set(cmd);
+	std::cout << "resolved attribute set\n";
+
 }
 
-void Message::add_attribute(nl80211_attr_type_t attr_type, Attribute::AttributeValueType attr_val_type, void ** attr_value)
+void Message::add_attribute(nl80211_attr_type_t attr_type, Attribute::AttributeValueType attr_val_type, void * attr_value)
 {
 	switch (attr_val_type)
 	{
 		case Attribute::AttributeValueType::UINT32 :
-			NLA_PUT_U32(message, attr_type, *(uint32_t *)*attr_value);
+			NLA_PUT_U32(message, attr_type, *((uint32_t *)attr_value));
 			break;
 
 		case Attribute::AttributeValueType::STRING :
-			std::cout << *(char **)attr_value << "\n";
-			NLA_PUT_STRING(message, attr_type, (char *)*attr_value);
+			std::cout << "add_attribute(): member: \t"  << *((std::string *)attr_value) << "\n";
+			NLA_PUT_STRING(message, attr_type, (char *)attr_value);
 			break;
 
 		default :
@@ -62,7 +66,6 @@ void Message::add_attribute(nl80211_attr_type_t attr_type, Attribute::AttributeV
 
 void Message::get_attr()
 {
-
 	genlmsghdr * header;
 	nlattr_t   * attributes[NL80211_ATTR_MAX + 1];
 
@@ -103,8 +106,12 @@ void Message::prepare_message(Attribute * attr, Attribute::Command cmd, void ** 
 
 	Attribute::attr_block_t * identifier = attr->get_identifier(arg);
 
+	std::cout << "got: identifier: type \t"  << identifier->attr_type << "\n";
+	std::cout << "member: \t"  << *((std::string *)identifier->attr_class_member) << "\n";
+
 	// TODO
-	add_attribute(identifier->attr_type, identifier->attr_val_type, &identifier->attr_class_member);
+	add_attribute(identifier->attr_type, identifier->attr_val_type, identifier->attr_class_member);
+	std::cout << "message flags: \t" << "\n";
 }
 
 mynlret_t Message::send(Socket * socket)
@@ -113,6 +120,8 @@ mynlret_t Message::send(Socket * socket)
 	{
 		return MYNL_ERROR;
 	}
+
+	std::cout << "send()\n";
 
 	// Add header to the message
 
