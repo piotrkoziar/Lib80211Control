@@ -135,6 +135,7 @@ void Wiphy::setup_maps()
     };
 
 
+
     // TODO maybe find in the attribute_map what are the values for the name class member
     identifier =
     {

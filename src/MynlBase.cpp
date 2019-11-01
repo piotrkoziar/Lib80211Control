@@ -8,10 +8,11 @@ class MynlBaseInstance
 public:
     void Main()
     {
-        Socket sock;
+        Socket * sock = new Socket();
         Wiphy * wiphy = new Wiphy("phy0");
-        Message msg(wiphy, Attribute::Command::Get, NULL);
-
+        Message * msg = new Message();
+        msg->prepare_message(wiphy, Attribute::Command::Get, NULL);
+        msg->send(sock);
     }
 };
 

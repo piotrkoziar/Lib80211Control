@@ -36,7 +36,7 @@ private:
 	* and finds corresponding (Message::command) and (Message::attribute_type) and (Message::attribute_value_type).
 	*/
 	void command_attribute_resolve(Attribute * attr, Attribute::Command cmd);
-	void add_attribute(nl80211_attr_type_t attr_type, Attribute::AttributeValueType attr_val_type, void ** attr_value);
+	void add_attribute(nl80211_attr_type_t attr_type, Attribute::AttributeValueType attr_val_type, void * attr_value);
 
 /* callbacks */
 private:
