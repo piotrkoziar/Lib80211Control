@@ -11,7 +11,7 @@
 // #include <netlink/attr.h>
 #include <linux/nl80211.h>
 
-namespace mynl
+namespace wiphynlcontrol
 {
 
 typedef enum {
@@ -19,6 +19,6 @@ typedef enum {
     MYNL_ERROR   = -1,
 } mynlret_t;
 
-} // namespace mynl
+} // namespace wiphynlcontrol
 
 #endif // declared __mynl__

@@ -4,7 +4,7 @@
 
 #include "Message.h"
 
-namespace mynl {
+namespace wiphynlcontrol {
 
 class MynlBase {
 private:
@@ -12,6 +12,6 @@ private:
 
 }
 
-} // namespace mynl
+} // namespace wiphynlcontrol
 
 #endif // declared __mynl_Base__

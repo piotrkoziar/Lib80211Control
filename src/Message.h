@@ -12,9 +12,9 @@ typedef struct nl_msg  		    nl_msg_t;
 typedef struct sockaddr_nl		sockaddr_nl_t;
 typedef struct nlmsgerr			nlmsgerr_t;
 
-typedef std::set<mynl::Attribute::attr_block_t> attr_set_t;
+typedef std::set<wiphynlcontrol::Entity::AttributeBlock> attr_set_t;
 
-namespace mynl {
+namespace wiphynlcontrol {
 
 class Message {
 private:
@@ -25,18 +25,18 @@ private:
 	nl80211_cmd_t   command;
 	attr_set_t	  * attribute_set;
 	bool 		    valid;
-	nl_cb_t		  * callback;
+	LibnlCallback		  * callback;
 
 public:
 	Message();
-	Message(Attribute * attr, Attribute::Command cmd, void ** arg);
+	Message(Entity * attr, Entity::Commands cmd, void ** arg);
 
 private:
 	/* TODO This function gets the Attribute and Command (Command states what to do with the attribute, i.e. set, get)
 	* and finds corresponding (Message::command) and (Message::attribute_type) and (Message::attribute_value_type).
 	*/
-	void command_attribute_resolve(Attribute * attr, Attribute::Command cmd);
-	void add_attribute(nl80211_attr_type_t attr_type, Attribute::AttributeValueType attr_val_type, void * attr_value);
+	void command_attribute_resolve(Entity * attr, Entity::Commands cmd);
+	void add_attribute(Nl80211AttributeTypes attr_type, Entity::AttributeValueTypes attr_val_type, void * attr_value);
 
 /* callbacks */
 private:
@@ -50,12 +50,12 @@ public:
 	void get_attr();
 
 	/* Call this method to prepare the message. Must be called before the send() method. */
-	void prepare_message(Attribute * attr, Attribute::Command cmd, void ** arg);
+	void prepare_message(Entity * attr, Entity::Commands cmd, void ** arg);
 
 	/* Send method. */
 	mynlret_t send(Socket * socket);
 }; // class NetlinkMessage
 
-} // namespace mynl
+} // namespace wiphynlcontrol
 
 #endif // defined __mynl_Message__
