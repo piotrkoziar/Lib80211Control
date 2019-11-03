@@ -1,70 +1,58 @@
 
 #include "Socket.h"
-#include <netlink/socket.h>
-#include <netlink/genl/genl.h>
+
 #include <netlink/genl/ctrl.h>
+#include <netlink/genl/genl.h>
+#include <netlink/socket.h>
 
-using namespace mynl;
+#include "Exception.h"
 
-Socket::Socket()
-{
-    do
-    {
-        socket = nl_socket_alloc();
-        if (!socket)
-        {
-            valid = false;
-            break;
-            // TODO return value ?
-            // Exceptions maybe
-        }
+namespace wiphynlcontrol {
 
-        int option_value = 1;
-        setsockopt(nl_socket_get_fd(socket), SOL_NETLINK, NETLINK_EXT_ACK, (void *)&option_value, sizeof(option_value));
+Socket::Socket() {
+  socket_ = nl_socket_alloc();
+  if (!socket_) {
+    throw Exception("Socket(): socket allocation failed");
+  }
 
-        callback = nl_cb_alloc(NL_CB_DEBUG);
-        if (!callback)
-        {
-            valid = false;
-            break;
-        }
+  // Set socket fd option NETLINK_EXT_ACK
+  int option_value = 1;
+  if ((setsockopt(nl_socket_get_fd(socket_), SOL_NETLINK, NETLINK_EXT_ACK,
+                 (void *)&option_value, sizeof(option_value))) < 0) {
+    throw Exception("Socket(): setsockopt() failed");
+  }
 
-        if (genl_connect(socket) < 0)
-        {
-            valid = false;
-            break;
-        }
+  callback_ = nl_cb_alloc(NL_CB_DEBUG);
+  if (!callback_) {
+    throw Exception("Socket(): callback allocation failed");
+  }
 
-        if ((nl80211_family_id = genl_ctrl_resolve(socket, "nl80211")) < 0)
-        {
-            valid = false;
-            break;
-        }
+  if (genl_connect(socket_) < 0) {
+    throw Exception("Socket(): genl_connect() exited with non-zero code");
+  }
 
-        valid = true;
-    } while(0);
-
+  if ((nl80211_family_id_ = genl_ctrl_resolve(socket_, "nl80211")) < 0) {
+    throw Exception(
+        "Socket(): genl_ctrl_resolve() exited with negative error code");
+  }
 }
 
-mynlret_t Socket::set_callback(nl_cb_t * cb)
-{
-    callback = cb;
+void Socket::set_callback(LibnlCallback *cb) {
+  if (!cb) {
+    throw Exception("Socket::set_callback(): argument is NULL");
+  }
 
-    if (!valid)
-    {
-        return MYNL_ERROR;
-    }
+  callback_ = cb;
 
-    nl_socket_set_cb(socket, callback);
-    return MYNL_SUCCESS;
+  if (!socket_) {
+    throw Exception("Socket::set_callback(): socket not allocated");
+  }
+
+  nl_socket_set_cb(socket_, callback_);
 }
 
-int Socket::get_family_id()
-{
-    return nl80211_family_id;
-}
+int Socket::get_family_id() { return nl80211_family_id_; }
 
-nl_sock_t * Socket::get_socket()
-{
-    return socket;
-}
+LibnlSocket *Socket::get_socket() { return socket_; }
+
+}  // namespace wiphynlcontrol

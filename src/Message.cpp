@@ -5,7 +5,7 @@
 #include <netlink/msg.h>
 #include <netlink/genl/genl.h>
 
-using namespace mynl;
+using namespace wiphynlcontrol;
 
 Message::Message()
 {
@@ -24,7 +24,7 @@ Message::Message()
 
 }
 
-Message::Message(Attribute * attr, Attribute::Command cmd, void ** arg)
+Message::Message(Entity * attr, Entity::Commands cmd, void ** arg)
 {
 	Message();
 
@@ -34,7 +34,7 @@ Message::Message(Attribute * attr, Attribute::Command cmd, void ** arg)
 
 }
 
-void Message::command_attribute_resolve(Attribute * attr, Attribute::Command cmd)
+void Message::command_attribute_resolve(Entity * attr, Entity::Commands cmd)
 {
 	// TODO method from the Attribute class should be called to resolve command, attribute_type, attribute_value_type
 	std::cout << "resolve command\n";
@@ -45,15 +45,15 @@ void Message::command_attribute_resolve(Attribute * attr, Attribute::Command cmd
 
 }
 
-void Message::add_attribute(nl80211_attr_type_t attr_type, Attribute::AttributeValueType attr_val_type, void * attr_value)
+void Message::add_attribute(Nl80211AttributeTypes attr_type, Entity::AttributeValueTypes attr_val_type, void * attr_value)
 {
 	switch (attr_val_type)
 	{
-		case Attribute::AttributeValueType::UINT32 :
+		case Entity::AttributeValueTypes::UINT32 :
 			NLA_PUT_U32(message, attr_type, *((uint32_t *)attr_value));
 			break;
 
-		case Attribute::AttributeValueType::STRING :
+		case Entity::AttributeValueTypes::STRING :
 			std::cout << "add_attribute(): member: \t"  << *((std::string *)attr_value) << "\n";
 			NLA_PUT_STRING(message, attr_type, (char *)attr_value);
 			break;
@@ -67,7 +67,7 @@ void Message::add_attribute(nl80211_attr_type_t attr_type, Attribute::AttributeV
 void Message::get_attr()
 {
 	genlmsghdr * header;
-	nlattr_t   * attributes[NL80211_ATTR_MAX + 1];
+	NlAttribute   * attributes[NL80211_ATTR_MAX + 1];
 
 	if (!(header = (genlmsghdr *)nlmsg_data(nlmsg_hdr(message))))
 	{
@@ -85,11 +85,11 @@ void Message::get_attr()
 			switch (itr->attr_val_type)
 			{
 				default:
-				case Attribute::AttributeValueType::UINT32 :
+				case Entity::AttributeValueTypes::UINT32 :
 					*(uint32_t *)itr->attr_class_member = *(uint32_t *)attribute_value;
 					break;
 
-				case Attribute::AttributeValueType::STRING :
+				case Entity::AttributeValueTypes::STRING :
 					*(std::string *)itr->attr_class_member = *(std::string *)attribute_value;
 			}
 		}
@@ -97,21 +97,23 @@ void Message::get_attr()
 }
 
 /* Call this method to prepare the message. Must be called before the send() method. */
-void Message::prepare_message(Attribute * attr, Attribute::Command cmd, void ** arg)
+void Message::prepare_message(Entity * attr, Entity::Commands cmd, void ** arg)
 {
 	// TODO : case when no arg
 
 	// Obtain info
 	command_attribute_resolve(attr, cmd);
 
-	Attribute::attr_block_t * identifier = attr->get_identifier(arg);
+	Entity::AttributeBlock * identifier = attr->get_identifier(arg);
 
 	std::cout << "got: identifier: type \t"  << identifier->attr_type << "\n";
 	std::cout << "member: \t"  << *((std::string *)identifier->attr_class_member) << "\n";
 
 	// TODO
 	add_attribute(identifier->attr_type, identifier->attr_val_type, identifier->attr_class_member);
-	std::cout << "message flags: \t" << "\n";
+	std::cout << "message flags:" << "\n";
+	message_flags = NLM_F_DUMP;
+	std::cout << message_flags << "\n";
 }
 
 mynlret_t Message::send(Socket * socket)
@@ -211,8 +213,8 @@ int Message::error_handler(sockaddr_nl_t * nla, nlmsgerr_t * err_msg, void * arg
 		return NL_STOP;
 	}
 
-	nlattr_t * attributes = (nlattr_t *)((unsigned char *)header + ack_length);
-	nlattr_t * err_attributes[NLMSGERR_ATTR_MAX + 1];
+	NlAttribute * attributes = (NlAttribute *)((unsigned char *)header + ack_length);
+	NlAttribute * err_attributes[NLMSGERR_ATTR_MAX + 1];
 
 	nla_parse(err_attributes, NLMSGERR_ATTR_MAX, attributes, (header->nlmsg_len - ack_length), NULL);
 	if (err_attributes[NLMSGERR_ATTR_MSG])

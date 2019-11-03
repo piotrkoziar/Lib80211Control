@@ -1,95 +1,88 @@
-#ifndef __mynl_Attribute__
-#define __mynl_Attribute__
+#ifndef WIPHYNLCONTROL_ATTRIBUTE_H_
+#define WIPHYNLCONTROL_ATTRIBUTE_H_
 
-#include <stdint.h>
 #include <linux/nl80211.h>
-#include <unordered_map>
+#include <stdint.h>
 #include <set>
 #include <string>
+#include <unordered_map>
 
-typedef enum nl80211_commands                   nl80211_command_t;
-typedef enum nl80211_attrs                      nl80211_attr_type_t;
-typedef struct nlattr                           nlattr_t;
+typedef enum nl80211_commands Nl80211Commands;
+typedef enum nl80211_attrs    Nl80211AttributeTypes;
+typedef struct nlattr         NlAttribute;
 
-namespace mynl
-{
+namespace wiphynlcontrol {
 
-// class that is parent class for every attribute class.
-class Attribute
-{
-public:
-	enum class Command
-	{
-		Set,
-		Get,
-		New,
-		Del
-	};
+// This is parent class for the Wiphy, Interface etc. classes.
+class Entity {
+ public:
+  enum class Commands { Set, Get, New, Del };
 
-	enum class AttributeValueType
-	{
-		UINT32,
-		STRING
-	};
+  enum class AttributeValueTypes { UINT32, STRING };
 
-	typedef struct attr_block
-	{
-		void                          * attr_class_member;
-		nl80211_attr_type_t             attr_type;
-		Attribute::AttributeValueType   attr_val_type;
+  typedef struct AttributeBlock {
+    void                  *attr_class_member;
+    Nl80211AttributeTypes attr_type;
+    AttributeValueTypes   attr_val_type;
+    // Operator needed for the std::set at() call.
+    bool operator<(const struct AttributeBlock &t) const {
+      return (static_cast<int>(this->attr_type) <
+              static_cast<int>(t.attr_type));
+    }
+  } AttributeBlock;
 
-		bool operator<(const struct attr_block &t) const
-		{
-			return ((int)this->attr_type < (int)t.attr_type);
-		}
-	} attr_block_t;
+ protected:
+  AttributeBlock        identifier_;
+  Nl80211AttributeTypes attribute_;
+  void                  *attribute_value_;
 
-protected:
-	attr_block_t identifier;
-	nl80211_attr_type_t attribute;
-	void * attribute_value;
+ protected:
+  // Maps command to the corresponding nl80211 command. TODO also identifier
+  std::unordered_map<Commands, Nl80211Commands> command_map_;
+  // Maps command to the set of the attributes that are connected
+  // with the command
+  std::unordered_map<Commands, std::set<AttributeBlock>> attribute_map_;
 
-protected:
-	std::unordered_map<Command, nl80211_command_t>      command_map;
-	std::unordered_map<Command, std::set<attr_block_t>> attribute_map;
+ public:
+  // TODO identifier thing should be replaced with specifying the necessary
+  // attribute in the command map.
+  virtual AttributeBlock *get_identifier(void **arg) = 0;
 
-public:
-	virtual attr_block_t * get_identifier(void ** arg) = 0;
-
-public:
-	nl80211_command_t resolve_command(Command cmd);
-	std::set<Attribute::attr_block_t> * resolve_attribute_set(Command cmd);
+ public:
+  // Returns matching nl80211 command. Uses command_map_ member. TODO
+  Nl80211Commands resolve_command(Commands cmd);
+  // Returns pointer to the corresponding std::set. Uses attribute_map_ member.
+  std::set<Entity::AttributeBlock> *resolve_attribute_set(Commands cmd);
 };
 
-// TODO Attribute classes.
+// Here declare classes derived from Entity class.
 
-class Wiphy
-	: public Attribute
-{
-public:
-	Wiphy(void);
-	Wiphy(std::string name);
+class Wiphy : public Entity {
+ public:
+  Wiphy();
+  Wiphy(std::string name);
 
-private:
-	void setup_maps(void);
+ public:
+  uint32_t    id_;
+  std::string name_;
+  std::string address_;
+  uint32_t    frequency_;
 
-public:
-	virtual attr_block_t * get_identifier(void ** arg);
+ private:
+  // Fills command_map_ and attribute_map_.
+  // Here apply changes related to command to attribute mapping.
+  void setup_maps();
 
-public:
-	uint32_t    id;
-	std::string name;
-	std::string	addr;
-
+ public:
+  // TODO
+  virtual AttributeBlock *get_identifier(void **arg);
 };
 
-class Interface
-	: private Attribute
-{ // TODO
-public:
-	uint32_t index;
-	char *name;
+class Interface : public Entity {  // TODO
+ public:
+  uint32_t    index_;
+  std::string *name_;
 };
 
-} // namespace mynl
-#endif // defined __mynl_Attribute__
+}  // namespace wiphynlcontrol
+#endif  // defined WIPHYNLCONTROL_ATTRIBUTE_H_

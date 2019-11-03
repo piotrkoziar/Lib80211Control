@@ -1,31 +1,36 @@
 
-#ifndef __mynl_Socket__
-#define __mynl_Socket__
+#ifndef WIPHYNLCONTROL_SOCKET_H_
+#define WIPHYNLCONTROL_SOCKET_H_
 
 #include "mynl.h"
 
-typedef struct nl_sock nl_sock_t;
-typedef struct nl_cb   nl_cb_t;
+typedef struct nl_sock LibnlSocket;
+typedef struct nl_cb   LibnlCallback;
 
-namespace mynl {
+namespace wiphynlcontrol {
 
 class Socket {
-private:
-    nl_sock_t * socket;
-    nl_cb_t   * callback;
-    int         nl80211_family_id;
-    bool        valid;
+ private:
+  LibnlSocket   *socket_;
+  LibnlCallback *callback_;
+  int           nl80211_family_id_;
 
-public:
-    Socket(void);
+ public:
+  Socket();
 
-public:
-    mynlret_t   set_callback(nl_cb_t * cb);
-    int         get_family_id(void);
-    nl_sock_t * get_socket();
+ public:
+  // Sets Socket callback.
+  void set_callback(LibnlCallback *cb);
 
-}; // Socket
+  // Returns the numeric identifier for the Socket family name.
+  // Socket family name is Generic Netlink and it is set in the constructor.
+  int get_family_id();
 
-} // namespace mynl
+  // Returns pointer to the LibnlSocket member.
+  LibnlSocket *get_socket();
 
-#endif // defined __mynl_Socket__
+};  // Socket
+
+}  // namespace wiphynlcontrol
+
+#endif  // defined WIPHYNLCONTROL_SOCKET_H_

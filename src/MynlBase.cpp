@@ -1,18 +1,30 @@
 
 #include "Message.h"
+#include <iostream>
 
-using namespace mynl;
+using namespace wiphynlcontrol;
+using namespace std;
 
 class MynlBaseInstance
 {
 public:
     void Main()
     {
-        Socket * sock = new Socket();
-        Wiphy * wiphy = new Wiphy("phy0");
-        Message * msg = new Message();
-        msg->prepare_message(wiphy, Attribute::Command::Get, NULL);
-        msg->send(sock);
+        try
+        {
+            Socket * sock = new Socket();
+            Wiphy * wiphy = new Wiphy("phy0");
+            cout << wiphy->name_ << "\n";
+            Message * msg = new Message();
+            msg->prepare_message(wiphy, Entity::Commands::Get, NULL);
+            msg->send(sock);
+            cout << wiphy->id_ << "\n";
+            cout << wiphy->frequency_ << "\n";
+        }
+        catch (exception &e)
+        {
+            cout << "Exception: " << e.what() << "\n";
+        }
     }
 };
 
