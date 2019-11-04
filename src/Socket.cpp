@@ -10,7 +10,7 @@
 
 namespace wiphynlcontrol {
 
-Socket::Socket(LibnlCallbackKind cb_kind) {
+Socket::Socket(CallbackKind cb_kind) {
   socket_ = nl_socket_alloc();
   if (!socket_) {
     throw Exception("Socket(): socket allocation failed");
@@ -27,7 +27,7 @@ Socket::Socket(LibnlCallbackKind cb_kind) {
     std::cerr << e.what() << '\n';
   }
 
-  callback_ = nl_cb_alloc(cb_kind);
+  callback_ = nl_cb_alloc(static_cast<LibnlCallbackKind>(cb_kind));
   if (!callback_) {
     throw Exception("Socket(): callback allocation failed");
   }

@@ -8,6 +8,11 @@ typedef struct nl_sock  LibnlSocket;
 typedef struct nl_cb    LibnlCallback;
 typedef enum nl_cb_kind LibnlCallbackKind;
 
+typedef enum {
+  CALLBACK_DEFAULT = LibnlCallbackKind::NL_CB_DEFAULT,
+  CALLBACK_DEBUG   = LibnlCallbackKind::NL_CB_DEBUG
+} CallbackKind;
+
 namespace wiphynlcontrol {
 
 class Socket {
@@ -17,7 +22,7 @@ class Socket {
   int           nl80211_family_id_;
 
  public:
-  Socket(LibnlCallbackKind cb_kind = NL_CB_DEBUG);
+  Socket(CallbackKind cb_kind = CALLBACK_DEFAULT);
 
  public:
   // Sets Socket callback.
