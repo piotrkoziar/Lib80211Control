@@ -21,19 +21,20 @@ static int finish_handler(NlMessage *msg, void *arg);
 // Immediately returns if arg is NULL.
 static int valid_handler(NlMessage *msg, Communicator *arg);
 
-Communicator::Communicator() {
+Communicator::Communicator(CallbackKind cb_kind) {
   message_ = nlmsg_alloc();
   if (!message_) {
     throw Exception("Message(): message allocation failed");
   }
-  // TODO NL_CB_DEBUG, NL_CB_DEFAULT
-  callback_ = nl_cb_alloc(NL_CB_DEBUG);
+
+  callback_ = nl_cb_alloc(static_cast<LibnlCallbackKind>(cb_kind));
   if (!callback_) {
     throw Exception("Message(): callback allocation failed");
   }
 }
 
-Communicator::Communicator(Entity *attr, Entity::Commands cmd, void **arg) {
+Communicator::Communicator(CallbackKind cb_kind, Entity *attr,
+                           Entity::Commands cmd, void **arg) {
   Communicator();
   // TODO
 }

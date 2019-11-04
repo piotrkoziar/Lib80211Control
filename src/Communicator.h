@@ -24,8 +24,9 @@ class Communicator {
   std::string     error_report_;
 
  public:
-  Communicator();
-  Communicator(Entity *entity, Entity::Commands cmd, void **arg);
+  Communicator(CallbackKind cb_kind = CALLBACK_DEFAULT);
+  Communicator(CallbackKind cb_kind, Entity *entity, Entity::Commands cmd,
+               void **arg);
 
  private:
   // Sets attribute_set_ pointer on attribute set address from the entity.

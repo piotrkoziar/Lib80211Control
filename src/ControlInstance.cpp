@@ -2,8 +2,7 @@
 #include <iostream>
 #include "Communicator.h"
 
-using namespace wiphynlcontrol;
-using namespace std;
+namespace wiphynlcontrol {
 
 class ControlInstance {
  public:
@@ -12,21 +11,23 @@ class ControlInstance {
       // Test
       Socket *sock = new Socket();
       Wiphy *wiphy = new Wiphy("phy0");
-      Communicator *com = new Communicator();
+      Communicator *com = new Communicator(CALLBACK_DEFAULT);
 
       com->prepare_message(wiphy, Entity::Commands::Get, NULL);
       com->challenge(sock);
 
-      cout << wiphy->id_ << "\n";
-      cout << wiphy->name_ << "\n";
-    } catch (exception &e) {
-      cout << "Exception: " << e.what() << "\n";
+      std::cout << wiphy->id_ << "\n";
+      std::cout << wiphy->name_ << "\n";
+    } catch (std::exception &e) {
+      std::cout << "Exception: " << e.what() << "\n";
     }
   }
 };
 
+}  // namespace wiphynlcontrol
+
 int main(int argc, char **argv) {
-  ControlInstance mynl_base;
+  wiphynlcontrol::ControlInstance mynl_base;
   mynl_base.Main();
 
   return 0;
