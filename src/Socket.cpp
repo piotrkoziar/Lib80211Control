@@ -60,4 +60,9 @@ int Socket::get_family_id() const { return nl80211_family_id_; }
 
 LibnlSocket *Socket::get_socket() const { return socket_; }
 
+Socket::~Socket() {
+  nl_cb_put(callback_);
+  nl_socket_free(socket_);
+}
+
 }  // namespace wiphynlcontrol
