@@ -1,26 +1,22 @@
-#ifndef __80211Control_Exception__
-#define __80211Control_Exception__
+#ifndef WIPHYNLCONTROL_EXCEPTION_H_
+#define WIPHYNLCONTROL_EXCEPTION_H_
 
 #include <exception>
 
-namespace wiphynlcontrol
-{
+namespace wiphynlcontrol {
 
 class Exception : public std::exception {
-private:
-    const char* info;
+ private:
+  const char* info_;
 
-public:
-    Exception(const char* _info);
+ public:
+  explicit Exception(const char* info = "");
 
-public:
-    const char * what () const noexcept
-    {
-    	return this->info;
-    }
+ public:
+  const char* what() const noexcept { return this->info_; }
 
-}; //Exception
+};  // Exception
 
-} // namspace wiphynlcontrol
+}  // namespace wiphynlcontrol
 
-#endif // defined __80211Control_Exception__
+#endif  // defined WIPHYNLCONTROL_EXCEPTION_H_

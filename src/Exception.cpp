@@ -1,7 +1,7 @@
 #include "Exception.h"
 
-using namespace wiphynlcontrol;
+namespace wiphynlcontrol {
 
-Exception::Exception(const char* _info = "") : info(_info)
-{
-}
+Exception::Exception(const char* info) : info_(info) {}
+
+}  // namespace wiphynlcontrol

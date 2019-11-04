@@ -1,11 +1,10 @@
-#include "Attribute.h"
-#include <iostream>
+#include "Wiphy.h"
 
 namespace wiphynlcontrol {
 
 Wiphy::Wiphy() { setup_maps(); }
 
-Wiphy::Wiphy(std::string name) : name_(name) { setup_maps(); }
+Wiphy::Wiphy(const char *name) : name_(name) { setup_maps(); }
 
 void Wiphy::setup_maps() {
   command_map_ = {{Commands::Set, NL80211_CMD_SET_WIPHY},
@@ -67,7 +66,7 @@ void Wiphy::setup_maps() {
       },  // Commands::Del
   };      // attribute_map_
 
-  // TODO This goes to command_map_
+  // Identifies the entity.
   identifier_ = {
       .attr_class_member = static_cast<void *>(&name_),
       .attr_type = NL80211_ATTR_WIPHY,
@@ -76,19 +75,7 @@ void Wiphy::setup_maps() {
 }
 
 Entity::AttributeBlock *Wiphy::get_identifier(void **arg) {
-  if ((*(std::string *)identifier_.attr_class_member) == "") {
-    return NULL;
-  }
-
   return &identifier_;
-}
-
-Nl80211Commands Entity::resolve_command(Commands cmd) {
-  return command_map_.at(cmd);
-}
-
-std::set<Entity::AttributeBlock> *Entity::resolve_attribute_set(Commands cmd) {
-  return &attribute_map_.at(cmd);
 }
 
 }  // namespace wiphynlcontrol
