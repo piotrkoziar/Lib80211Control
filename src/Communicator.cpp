@@ -157,6 +157,11 @@ void Communicator::challenge(Socket *socket) {
   }
 }
 
+Communicator::~Communicator() {
+  nl_cb_put(callback_);
+  nlmsg_free(message_);
+}
+
 // Message handlers.
 
 int error_handler(NlSocketAddress *nla, NlErrorMessageHeader *err_msg,

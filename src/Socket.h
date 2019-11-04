@@ -35,6 +35,8 @@ class Socket {
   // Returns pointer to the LibnlSocket member.
   LibnlSocket *get_socket() const;
 
+ public:
+  ~Socket();
 };  // Socket
 
 }  // namespace wiphynlcontrol

@@ -51,6 +51,9 @@ class Communicator {
   void prepare_message(Entity *entity, Entity::Commands cmd, void **arg);
   // Sends the message_ and gets the answer.
   void challenge(Socket *socket);
+
+ public:
+  ~Communicator();
 };  // class Communicator
 
 }  // namespace wiphynlcontrol
