@@ -2,10 +2,11 @@
 #ifndef WIPHYNLCONTROL_SOCKET_H_
 #define WIPHYNLCONTROL_SOCKET_H_
 
-#include "mynl.h"
+#include <netlink/handlers.h>
 
-typedef struct nl_sock LibnlSocket;
-typedef struct nl_cb   LibnlCallback;
+typedef struct nl_sock  LibnlSocket;
+typedef struct nl_cb    LibnlCallback;
+typedef enum nl_cb_kind LibnlCallbackKind;
 
 namespace wiphynlcontrol {
 
@@ -16,18 +17,18 @@ class Socket {
   int           nl80211_family_id_;
 
  public:
-  Socket();
+  Socket(LibnlCallbackKind cb_kind = NL_CB_DEBUG);
 
  public:
   // Sets Socket callback.
-  void set_callback(LibnlCallback *cb);
+  void set_callback(const LibnlCallback *cb);
 
   // Returns the numeric identifier for the Socket family name.
   // Socket family name is Generic Netlink and it is set in the constructor.
-  int get_family_id();
+  int get_family_id() const;
 
   // Returns pointer to the LibnlSocket member.
-  LibnlSocket *get_socket();
+  LibnlSocket *get_socket() const;
 
 };  // Socket
 

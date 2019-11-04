@@ -5,24 +5,29 @@
 #include <netlink/genl/genl.h>
 #include <netlink/socket.h>
 
+#include <iostream>
 #include "Exception.h"
 
 namespace wiphynlcontrol {
 
-Socket::Socket() {
+Socket::Socket(LibnlCallbackKind cb_kind) {
   socket_ = nl_socket_alloc();
   if (!socket_) {
     throw Exception("Socket(): socket allocation failed");
   }
 
-  // Set socket fd option NETLINK_EXT_ACK
-  int option_value = 1;
-  if ((setsockopt(nl_socket_get_fd(socket_), SOL_NETLINK, NETLINK_EXT_ACK,
-                 (void *)&option_value, sizeof(option_value))) < 0) {
-    throw Exception("Socket(): setsockopt() failed");
+  try {
+    // Set socket fd option NETLINK_EXT_ACK
+    int option_value = 1;
+    if (setsockopt(nl_socket_get_fd(socket_), SOL_NETLINK, NETLINK_EXT_ACK,
+                   &option_value, sizeof(option_value)) < 0) {
+      throw Exception("Socket(): setsockopt() failed");
+    }
+  } catch (const std::exception &e) {
+    std::cerr << e.what() << '\n';
   }
 
-  callback_ = nl_cb_alloc(NL_CB_DEBUG);
+  callback_ = nl_cb_alloc(cb_kind);
   if (!callback_) {
     throw Exception("Socket(): callback allocation failed");
   }
@@ -37,12 +42,12 @@ Socket::Socket() {
   }
 }
 
-void Socket::set_callback(LibnlCallback *cb) {
+void Socket::set_callback(const LibnlCallback *cb) {
   if (!cb) {
     throw Exception("Socket::set_callback(): argument is NULL");
   }
 
-  callback_ = cb;
+  callback_ = const_cast<LibnlCallback *>(cb);
 
   if (!socket_) {
     throw Exception("Socket::set_callback(): socket not allocated");
@@ -51,8 +56,8 @@ void Socket::set_callback(LibnlCallback *cb) {
   nl_socket_set_cb(socket_, callback_);
 }
 
-int Socket::get_family_id() { return nl80211_family_id_; }
+int Socket::get_family_id() const { return nl80211_family_id_; }
 
-LibnlSocket *Socket::get_socket() { return socket_; }
+LibnlSocket *Socket::get_socket() const { return socket_; }
 
 }  // namespace wiphynlcontrol

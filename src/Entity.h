@@ -1,7 +1,8 @@
-#ifndef WIPHYNLCONTROL_ATTRIBUTE_H_
-#define WIPHYNLCONTROL_ATTRIBUTE_H_
+#ifndef WIPHYNLCONTROL_ENTITY_H_
+#define WIPHYNLCONTROL_ENTITY_H_
 
 #include <linux/nl80211.h>
+
 #include <stdint.h>
 #include <set>
 #include <string>
@@ -37,7 +38,7 @@ class Entity {
   void                  *attribute_value_;
 
  protected:
-  // Maps command to the corresponding nl80211 command. TODO also identifier
+  // Maps command to the corresponding nl80211 command.
   std::unordered_map<Commands, Nl80211Commands> command_map_;
   // Maps command to the set of the attributes that are connected
   // with the command
@@ -55,34 +56,5 @@ class Entity {
   std::set<Entity::AttributeBlock> *resolve_attribute_set(Commands cmd);
 };
 
-// Here declare classes derived from Entity class.
-
-class Wiphy : public Entity {
- public:
-  Wiphy();
-  Wiphy(std::string name);
-
- public:
-  uint32_t    id_;
-  std::string name_;
-  std::string address_;
-  uint32_t    frequency_;
-
- private:
-  // Fills command_map_ and attribute_map_.
-  // Here apply changes related to command to attribute mapping.
-  void setup_maps();
-
- public:
-  // TODO
-  virtual AttributeBlock *get_identifier(void **arg);
-};
-
-class Interface : public Entity {  // TODO
- public:
-  uint32_t    index_;
-  std::string *name_;
-};
-
 }  // namespace wiphynlcontrol
-#endif  // defined WIPHYNLCONTROL_ATTRIBUTE_H_
+#endif  // defined WIPHYNLCONTROL_ENTITY_H_
