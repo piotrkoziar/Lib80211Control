@@ -28,12 +28,6 @@ Socket::Socket(CallbackKind cb_kind) {
     std::cerr << e.what() << '\n';
   }
 
-  callback_ = nl_cb_alloc(static_cast<LibnlCallbackKind>(cb_kind));
-  if (!callback_) {
-    throw Exception("Socket(): callback allocation failed");
-  }
-  nl_socket_set_cb(socket_, callback_);
-
   if (genl_connect(socket_) < 0) {
     throw Exception("Socket(): genl_connect() exited with non-zero code");
   }
@@ -42,6 +36,12 @@ Socket::Socket(CallbackKind cb_kind) {
     throw Exception(
         "Socket(): genl_ctrl_resolve() exited with negative error code");
   }
+
+  callback_ = nl_cb_alloc(static_cast<LibnlCallbackKind>(cb_kind));
+  if (!callback_) {
+    throw Exception("Socket(): callback allocation failed");
+  }
+  nl_socket_set_cb(socket_, callback_);
 }
 
 void Socket::set_callback(const LibnlCallback *cb) {

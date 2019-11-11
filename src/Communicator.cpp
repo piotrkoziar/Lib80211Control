@@ -48,17 +48,19 @@ void Communicator::add_attribute(Nl80211AttributeTypes attr_type,
                                  Entity::AttributeValueTypes attr_val_type,
                                  void *attr_value) {
   switch (attr_val_type) {
-    case Entity::AttributeValueTypes::UINT32:
+    case Entity::AttributeValueTypes::UINT32: {
       NLA_PUT_U32(message_, attr_type, *(static_cast<uint32_t *>(attr_value)));
       break;
-
-    case Entity::AttributeValueTypes::STRING:
-      NLA_PUT_STRING(message_, attr_type, static_cast<char *>(attr_value));
+    }
+    case Entity::AttributeValueTypes::STRING: {
+      NLA_PUT_STRING(message_, attr_type,
+                     (*static_cast<std::string *>(attr_value)).c_str());
       break;
-
-    default:
+    }
+    default: {
     nla_put_failure:  // Needed by NLA_PUT macro.
       break;
+    }
   }
 }
 
@@ -107,7 +109,7 @@ void Communicator::prepare_message(Entity *entity, Entity::Commands cmd,
 
   get_attribute_set(entity, cmd);
 
-  message_flags_ = NLM_F_DUMP;
+  message_flags_ = 0;  // NLM_F_DUMP;
 
   add_attribute(identifier->attr_type, identifier->attr_val_type,
                 identifier->attr_class_member);
@@ -117,7 +119,7 @@ void Communicator::challenge(Socket *socket) {
   if (!socket) {
     throw Exception("Communicator::challenge(): argument is NULL");
   }
-  if (!command_ || !message_flags_ || !message_) {
+  if (!command_ || !message_) {
     throw Exception("Communicator::challenge(): class members not set");
   }
 
