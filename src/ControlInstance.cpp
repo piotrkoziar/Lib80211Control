@@ -11,7 +11,7 @@ class ControlInstance {
       // Test
       Socket *sock = new Socket(CALLBACK_DEBUG);
       Wiphy *wiphy = new Wiphy("phy0");
-      Communicator *com = new Communicator(CALLBACK_DEFAULT);
+      Communicator *com = new Communicator(CALLBACK_DEBUG);
 
       com->prepare_message(wiphy, Entity::Commands::Get, NULL);
       com->challenge(sock);

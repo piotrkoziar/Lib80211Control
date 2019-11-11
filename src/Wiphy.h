@@ -3,6 +3,8 @@
 
 #include "Entity.h"
 
+#include <string>
+
 namespace wiphynlcontrol {
 
 class Wiphy : public Entity {

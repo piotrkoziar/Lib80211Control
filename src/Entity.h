@@ -5,7 +5,6 @@
 
 #include <stdint.h>
 #include <set>
-#include <string>
 #include <unordered_map>
 
 typedef enum nl80211_commands Nl80211Commands;
