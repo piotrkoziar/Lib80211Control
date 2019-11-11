@@ -24,6 +24,7 @@ Socket::Socket(CallbackKind cb_kind) {
       throw Exception("Socket(): setsockopt() failed");
     }
   } catch (const std::exception &e) {
+    // TODO do not put to strerror
     std::cerr << e.what() << '\n';
   }
 
@@ -31,6 +32,7 @@ Socket::Socket(CallbackKind cb_kind) {
   if (!callback_) {
     throw Exception("Socket(): callback allocation failed");
   }
+  nl_socket_set_cb(socket_, callback_);
 
   if (genl_connect(socket_) < 0) {
     throw Exception("Socket(): genl_connect() exited with non-zero code");

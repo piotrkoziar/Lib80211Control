@@ -1,10 +1,10 @@
+#include "Communicator.h"
 
 #include <netlink/genl/genl.h>
 #include <netlink/msg.h>
 #include <netlink/netlink.h>
 
 #include <iostream>
-#include "Communicator.h"
 #include "Exception.h"
 
 typedef struct nlmsghdr NlMessageHeader;
@@ -152,9 +152,7 @@ void Communicator::challenge(Socket *socket) {
             reinterpret_cast<nl_recvmsg_msg_cb_t>(valid_handler), this);
 
   // Get the answer.
-  while (ret > 0) {
-    nl_recvmsgs(socket->get_socket(), callback_);
-  }
+  nl_recvmsgs(socket->get_socket(), callback_);
 }
 
 Communicator::~Communicator() {
@@ -206,13 +204,12 @@ int error_handler(NlSocketAddress *nla, NlErrorMessageHeader *err_msg,
     ack_length =
         sizeof(NlMessageHeader) + sizeof(int) + sizeof(NlMessageHeader);
   }
-  // TODO dynamic cast or sth
+
   NlMessageHeader *header = reinterpret_cast<NlMessageHeader *>(err_msg) - 1;
   if (header->nlmsg_len <= ack_length) {
     // There is no attributes.
     return NL_STOP;
   }
-
   // Start address of the error attributes.
   NlAttribute *attributes = reinterpret_cast<NlAttribute *>(
       reinterpret_cast<unsigned char *>(header) + ack_length);

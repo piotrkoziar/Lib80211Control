@@ -9,7 +9,7 @@ class ControlInstance {
   void Main() {
     try {
       // Test
-      Socket *sock = new Socket();
+      Socket *sock = new Socket(CALLBACK_DEBUG);
       Wiphy *wiphy = new Wiphy("phy0");
       Communicator *com = new Communicator(CALLBACK_DEFAULT);
 
