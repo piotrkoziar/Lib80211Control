@@ -16,6 +16,7 @@ typedef std::set<Entity::AttributeBlock> AttributeSet;
 
 class Communicator {
  private:
+  int             nl80211_family_id_;
   NlMessage       *message_;
   int             message_flags_;
   Nl80211Commands command_;
@@ -37,20 +38,22 @@ class Communicator {
   void add_attribute(Nl80211AttributeTypes attr_type,
                      Entity::AttributeValueTypes attr_val_type,
                      void *attr_value);
+  // Uses the socket to query the kernel for numeric identifier of the Generic
+  // Netlink family name. Sets nl80211_family_id_ with the result.
+  void set_family_id(Socket *socket);
+  // Sends the message_ and gets the answer.
+  void send_and_receive(Socket *socket);
 
  public:
   // Gets attributes from the message_.
   // AttributeBlocks from the attribute_set_ are used.
-  // Returns immediately if attribute_set_ is not set (in most cases,
-  // when the prepare_message() was not called).
-  void get_attributes();
+  // Returns immediately if attribute_set_ is not set.
+  void get_attributes(NlMessage *msg);
   // Prepares the message.
   // Calls get_attribute_set() and add_attribute().
   // Sets message_flags_. Adds identifier attributes to the message.
-  // Usually called before the challenge() method.
-  void prepare_message(Entity *entity, Entity::Commands cmd, void **arg);
-  // Sends the message_ and gets the answer.
-  void challenge(Socket *socket);
+  void challenge(Socket *socket, Entity *entity, Entity::Commands cmd,
+                 void **arg);
 
  public:
   ~Communicator();

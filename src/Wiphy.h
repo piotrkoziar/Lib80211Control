@@ -10,7 +10,7 @@ namespace wiphynlcontrol {
 class Wiphy : public Entity {
  public:
   Wiphy();
-  explicit Wiphy(const char *name);
+  explicit Wiphy(const uint32_t id);
 
  public:
   uint32_t    id_;

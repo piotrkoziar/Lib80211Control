@@ -4,7 +4,7 @@ namespace wiphynlcontrol {
 
 Wiphy::Wiphy() { setup_maps(); }
 
-Wiphy::Wiphy(const char *name) : name_(name) { setup_maps(); }
+Wiphy::Wiphy(const uint32_t id) : id_(id) { setup_maps(); }
 
 void Wiphy::setup_maps() {
   command_map_ = {{Commands::Set, NL80211_CMD_SET_WIPHY},
@@ -68,9 +68,9 @@ void Wiphy::setup_maps() {
 
   // Identifies the entity.
   identifier_ = {
-      .attr_class_member = static_cast<void *>(&name_),
+      .attr_class_member = static_cast<void *>(&id_),
       .attr_type = NL80211_ATTR_WIPHY,
-      .attr_val_type = AttributeValueTypes::STRING,
+      .attr_val_type = AttributeValueTypes::UINT32,
   };
 }
 
