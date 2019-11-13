@@ -32,9 +32,7 @@ class Entity {
   } AttributeBlock;
 
  protected:
-  AttributeBlock        identifier_;
-  Nl80211AttributeTypes attribute_;
-  void                  *attribute_value_;
+  AttributeBlock identifier_;
 
  protected:
   // Maps command to the corresponding nl80211 command.

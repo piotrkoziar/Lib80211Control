@@ -10,11 +10,10 @@ class ControlInstance {
     try {
       // Test
       Socket *sock = new Socket(CALLBACK_DEBUG);
-      Wiphy *wiphy = new Wiphy("phy0");
+      Wiphy *wiphy = new Wiphy(0);
       Communicator *com = new Communicator(CALLBACK_DEBUG);
 
-      com->prepare_message(wiphy, Entity::Commands::Get, NULL);
-      com->challenge(sock);
+      com->challenge(sock, wiphy, Entity::Commands::Get, NULL);
 
       std::cout << wiphy->id_ << "\n";
       std::cout << wiphy->name_ << "\n";

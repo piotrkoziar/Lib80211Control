@@ -1,5 +1,6 @@
 #include "Communicator.h"
 
+#include <netlink/genl/ctrl.h>
 #include <netlink/genl/genl.h>
 #include <netlink/msg.h>
 #include <netlink/netlink.h>
@@ -64,16 +65,52 @@ void Communicator::add_attribute(Nl80211AttributeTypes attr_type,
   }
 }
 
-void Communicator::get_attributes() {
-  if (!message_ || !attribute_set_) {
+void Communicator::set_family_id(Socket *socket) {
+  if ((nl80211_family_id_ =
+           genl_ctrl_resolve(socket->get_socket(), "nl80211")) < 0) {
+    throw Exception("Communicator::set_family_id() failed");
+  }
+}
+
+void Communicator::send_and_receive(Socket *socket) {
+  if (!socket) {
+    throw Exception("Communicator::send_and_receive(): argument is NULL");
+  }
+  if (!command_ || !message_) {
+    throw Exception("Communicator::send_and_receive(): class members not set");
+  }
+
+  // Send the message
+  if (nl_send_auto(socket->get_socket(), message_) < 0) {
+    throw Exception(
+        "Communicator::send_and_receive() nl_send_auto() exited with negative \
+        error code");
+  }
+
+  // Set up callbacks
+  int ret = 1;
+  nl_cb_err(callback_, NL_CB_CUSTOM,
+            reinterpret_cast<nl_recvmsg_err_cb_t>(error_handler),
+            &this->error_report_);
+  nl_cb_set(callback_, NL_CB_FINISH, NL_CB_CUSTOM, finish_handler, &ret);
+  nl_cb_set(callback_, NL_CB_ACK, NL_CB_CUSTOM, ack_handler, &ret);
+  nl_cb_set(callback_, NL_CB_VALID, NL_CB_CUSTOM,
+            reinterpret_cast<nl_recvmsg_msg_cb_t>(valid_handler), this);
+
+  // Get the answer.
+  nl_recvmsgs(socket->get_socket(), callback_);
+}
+
+void Communicator::get_attributes(NlMessage *msg) {
+  if (!msg || !attribute_set_) {
     return;
   }
 
   NlGeMessageHeader *header;
   NlAttribute *attributes[NL80211_ATTR_MAX + 1];
 
-  if (!(header = static_cast<NlGeMessageHeader *>(
-            nlmsg_data(nlmsg_hdr(message_))))) {
+  if (!(header =
+            static_cast<NlGeMessageHeader *>(nlmsg_data(nlmsg_hdr(msg))))) {
     return;
   }
 
@@ -93,16 +130,16 @@ void Communicator::get_attributes() {
 
         case Entity::AttributeValueTypes::STRING:
           *static_cast<std::string *>(it->attr_class_member) =
-              *static_cast<std::string *>(attribute_value);
+              static_cast<const char *>(attribute_value);
       }
     }
   }
 }
 
-void Communicator::prepare_message(Entity *entity, Entity::Commands cmd,
-                                   void **arg) {
-  if (!entity) {
-    throw Exception("prepare_message(): argument is NULL");
+void Communicator::challenge(Socket *socket, Entity *entity,
+                             Entity::Commands cmd, void **arg) {
+  if (!entity || !socket) {
+    throw Exception("challenge(): argument is NULL");
   }
 
   Entity::AttributeBlock *identifier = entity->get_identifier(arg);
@@ -111,50 +148,25 @@ void Communicator::prepare_message(Entity *entity, Entity::Commands cmd,
 
   message_flags_ = 0;  // NLM_F_DUMP;
 
-  add_attribute(identifier->attr_type, identifier->attr_val_type,
-                identifier->attr_class_member);
-}
+  set_family_id(socket);
 
-void Communicator::challenge(Socket *socket) {
-  if (!socket) {
-    throw Exception("Communicator::challenge(): argument is NULL");
-  }
-  if (!command_ || !message_) {
-    throw Exception("Communicator::challenge(): class members not set");
-  }
-
-  // Add header to the message
-  if (!genlmsg_put(message_,                 // message
-                   NL_AUTO_PORT,             // port (auto)
-                   NL_AUTO_SEQ,              // sequence (auto)
-                   socket->get_family_id(),  // family (nl80211) id
-                   0,                        // user header len
-                   message_flags_,           // message flags
-                   command_,                 // command
-                   0))                       // interface version
+  // Add Netlink header, Generic Netlink header to the message.
+  if (!genlmsg_put(message_,            // message
+                   NL_AUTO_PORT,        // port (auto)
+                   NL_AUTO_SEQ,         // sequence (auto)
+                   nl80211_family_id_,  // family (nl80211) id
+                   0,                   // user header len
+                   message_flags_,      // message flags
+                   command_,            // command
+                   0))                  // interface version
   {
     throw Exception("Communicator::challenge(): adding message header failed");
   }
 
-  // Send the message
-  if (nl_send_auto(socket->get_socket(), message_) < 0) {
-    throw Exception(
-        "Communicator::challenge(): nl_send_auto() exited with negative error "
-        "code");
-  }
+  add_attribute(identifier->attr_type, identifier->attr_val_type,
+                identifier->attr_class_member);
 
-  // Set up callbacks
-  int ret = 1;
-  nl_cb_err(callback_, NL_CB_CUSTOM,
-            reinterpret_cast<nl_recvmsg_err_cb_t>(error_handler),
-            &this->error_report_);
-  nl_cb_set(callback_, NL_CB_FINISH, NL_CB_CUSTOM, finish_handler, &ret);
-  nl_cb_set(callback_, NL_CB_ACK, NL_CB_CUSTOM, ack_handler, &ret);
-  nl_cb_set(callback_, NL_CB_VALID, NL_CB_CUSTOM,
-            reinterpret_cast<nl_recvmsg_msg_cb_t>(valid_handler), this);
-
-  // Get the answer.
-  nl_recvmsgs(socket->get_socket(), callback_);
+  send_and_receive(socket);
 }
 
 Communicator::~Communicator() {
@@ -237,7 +249,7 @@ int valid_handler(NlMessage *msg, Communicator *arg) {
   if (!arg) {
     return NL_OK;
   }
-  static_cast<Communicator *>(arg)->get_attributes();
+  static_cast<Communicator *>(arg)->get_attributes(msg);
   return NL_OK;
 }
 

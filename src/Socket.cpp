@@ -1,7 +1,6 @@
 
 #include "Socket.h"
 
-#include <netlink/genl/ctrl.h>
 #include <netlink/genl/genl.h>
 #include <netlink/socket.h>
 
@@ -32,11 +31,6 @@ Socket::Socket(CallbackKind cb_kind) {
     throw Exception("Socket(): genl_connect() exited with non-zero code");
   }
 
-  if ((nl80211_family_id_ = genl_ctrl_resolve(socket_, "nl80211")) < 0) {
-    throw Exception(
-        "Socket(): genl_ctrl_resolve() exited with negative error code");
-  }
-
   callback_ = nl_cb_alloc(static_cast<LibnlCallbackKind>(cb_kind));
   if (!callback_) {
     throw Exception("Socket(): callback allocation failed");
@@ -57,8 +51,6 @@ void Socket::set_callback(const LibnlCallback *cb) {
 
   nl_socket_set_cb(socket_, callback_);
 }
-
-int Socket::get_family_id() const { return nl80211_family_id_; }
 
 LibnlSocket *Socket::get_socket() const { return socket_; }
 
