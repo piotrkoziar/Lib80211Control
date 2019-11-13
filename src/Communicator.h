@@ -37,7 +37,7 @@ class Communicator {
   // Adds attribute to the message_.
   void add_attribute(Nl80211AttributeTypes attr_type,
                      Entity::AttributeValueTypes attr_val_type,
-                     void *attr_value);
+                     std::weak_ptr<void> attr_value);
   // Uses the socket to query the kernel for numeric identifier of the Generic
   // Netlink family name. Sets nl80211_family_id_ with the result.
   void set_family_id(Socket *socket);

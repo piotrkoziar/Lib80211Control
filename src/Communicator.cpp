@@ -47,15 +47,17 @@ void Communicator::get_attribute_set(Entity *entity, Entity::Commands cmd) {
 
 void Communicator::add_attribute(Nl80211AttributeTypes attr_type,
                                  Entity::AttributeValueTypes attr_val_type,
-                                 void *attr_value) {
+                                 std::weak_ptr<void> attr_value) {
   switch (attr_val_type) {
     case Entity::AttributeValueTypes::UINT32: {
-      NLA_PUT_U32(message_, attr_type, *(static_cast<uint32_t *>(attr_value)));
+      NLA_PUT_U32(message_, attr_type,
+                  *std::static_pointer_cast<uint32_t>(attr_value.lock()));
       break;
     }
     case Entity::AttributeValueTypes::STRING: {
-      NLA_PUT_STRING(message_, attr_type,
-                     (*static_cast<std::string *>(attr_value)).c_str());
+      NLA_PUT_STRING(
+          message_, attr_type,
+          (*std::static_pointer_cast<std::string>(attr_value.lock())).c_str());
       break;
     }
     default: {
@@ -124,13 +126,14 @@ void Communicator::get_attributes(NlMessage *msg) {
       switch (it->attr_val_type) {
         default:
         case Entity::AttributeValueTypes::UINT32:
-          *static_cast<uint32_t *>(it->attr_class_member) =
+          *std::static_pointer_cast<uint32_t>(it->attr_class_member.lock()) =
               *static_cast<uint32_t *>(attribute_value);
           break;
 
         case Entity::AttributeValueTypes::STRING:
-          *static_cast<std::string *>(it->attr_class_member) =
+          *std::static_pointer_cast<std::string>(it->attr_class_member.lock()) =
               static_cast<const char *>(attribute_value);
+          break;
       }
     }
   }

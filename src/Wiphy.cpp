@@ -2,9 +2,15 @@
 
 namespace wiphynlcontrol {
 
-Wiphy::Wiphy() { setup_maps(); }
+Wiphy::Wiphy() { setup_maps(); }  //  TODO
 
-Wiphy::Wiphy(const uint32_t id) : id_(id) { setup_maps(); }
+Wiphy::Wiphy(const uint32_t id)
+    : id_(std::make_shared<uint32_t>(id)),
+      name_(std::make_shared<std::string>()),
+      address_(std::make_shared<std::string>()),
+      frequency_(std::make_shared<uint32_t>()) {
+  setup_maps();
+}
 
 void Wiphy::setup_maps() {
   command_map_ = {{Commands::Set, NL80211_CMD_SET_WIPHY},
@@ -33,42 +39,34 @@ void Wiphy::setup_maps() {
       {
           Commands::Set,
           std::set<AttributeBlock>{
-              {static_cast<void *>(&id_), NL80211_ATTR_WIPHY,
-               AttributeValueTypes::UINT32},
-              {static_cast<void *>(&name_), NL80211_ATTR_WIPHY_NAME,
-               AttributeValueTypes::STRING}},
+              {id_, NL80211_ATTR_WIPHY, AttributeValueTypes::UINT32},
+              {name_, NL80211_ATTR_WIPHY_NAME, AttributeValueTypes::STRING}},
       },  // Commands::Set
       {
           Commands::Get,
           std::set<AttributeBlock>{
-              {static_cast<void *>(&id_), NL80211_ATTR_WIPHY,
-               AttributeValueTypes::UINT32},
-              {static_cast<void *>(&name_), NL80211_ATTR_WIPHY_NAME,
-               AttributeValueTypes::STRING},
-              {static_cast<void *>(&frequency_), NL80211_ATTR_WIPHY_FREQ,
+              {id_, NL80211_ATTR_WIPHY, AttributeValueTypes::UINT32},
+              {name_, NL80211_ATTR_WIPHY_NAME, AttributeValueTypes::STRING},
+              {frequency_, NL80211_ATTR_WIPHY_FREQ,
                AttributeValueTypes::UINT32}},
       },  // Commands::Get
       {
           Commands::New,
           std::set<AttributeBlock>{
-              {static_cast<void *>(&id_), NL80211_ATTR_WIPHY,
-               AttributeValueTypes::UINT32},
-              {static_cast<void *>(&name_), NL80211_ATTR_WIPHY_NAME,
-               AttributeValueTypes::STRING}},
+              {id_, NL80211_ATTR_WIPHY, AttributeValueTypes::UINT32},
+              {name_, NL80211_ATTR_WIPHY_NAME, AttributeValueTypes::STRING}},
       },  // Commands::New
       {
           Commands::Del,
           std::set<AttributeBlock>{
-              {static_cast<void *>(&id_), NL80211_ATTR_WIPHY,
-               AttributeValueTypes::UINT32},
-              {static_cast<void *>(&name_), NL80211_ATTR_WIPHY_NAME,
-               AttributeValueTypes::STRING}},
+              {id_, NL80211_ATTR_WIPHY, AttributeValueTypes::UINT32},
+              {name_, NL80211_ATTR_WIPHY_NAME, AttributeValueTypes::STRING}},
       },  // Commands::Del
   };      // attribute_map_
 
   // Identifies the entity.
   identifier_ = {
-      .attr_class_member = static_cast<void *>(&id_),
+      .attr_class_member = id_,
       .attr_type = NL80211_ATTR_WIPHY,
       .attr_val_type = AttributeValueTypes::UINT32,
   };
@@ -77,5 +75,8 @@ void Wiphy::setup_maps() {
 Entity::AttributeBlock *Wiphy::get_identifier(void **arg) {
   return &identifier_;
 }
+
+// Gets AttributeBlock for name_ member.
+Entity::AttributeBlock *Wiphy::get_name() { return NULL; }
 
 }  // namespace wiphynlcontrol
