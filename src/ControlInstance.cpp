@@ -15,8 +15,9 @@ class ControlInstance {
 
       com->challenge(sock, wiphy, Entity::Commands::Get, NULL);
 
-      std::cout << wiphy->id_ << "\n";
-      std::cout << wiphy->name_ << "\n";
+      std::cout << *wiphy->id_ << "\n";
+      std::cout << *wiphy->name_ << "\n";
+      std::cout << *wiphy->frequency_ << '\n';
     } catch (std::exception &e) {
       std::cout << "Exception: " << e.what() << "\n";
     }

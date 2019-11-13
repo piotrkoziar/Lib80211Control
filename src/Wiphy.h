@@ -13,10 +13,10 @@ class Wiphy : public Entity {
   explicit Wiphy(const uint32_t id);
 
  public:
-  uint32_t    id_;
-  std::string name_;
-  std::string address_;
-  uint32_t    frequency_;
+  sp_(uint32_t)    id_;
+  sp_(std::string) name_;
+  sp_(std::string) address_;
+  sp_(uint32_t)    frequency_;
 
  private:
   // Fills command_map_ and attribute_map_.
@@ -26,6 +26,8 @@ class Wiphy : public Entity {
  public:
   // Returns pointer to AttributeBlock with identifier information. TODO
   virtual AttributeBlock *get_identifier(void **arg);
+  // Gets AttributeBlock for name_ member.
+  AttributeBlock *get_name();
 };
 
 }  // namespace wiphynlcontrol

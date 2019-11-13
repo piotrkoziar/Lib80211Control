@@ -3,9 +3,12 @@
 
 #include <linux/nl80211.h>
 
+#include <memory>
 #include <stdint.h>
 #include <set>
 #include <unordered_map>
+
+#define sp_(type) std::shared_ptr<type>
 
 typedef enum nl80211_commands Nl80211Commands;
 typedef enum nl80211_attrs    Nl80211AttributeTypes;
@@ -21,7 +24,7 @@ class Entity {
   enum class AttributeValueTypes { UINT32, STRING };
 
   typedef struct AttributeBlock {
-    void                  *attr_class_member;
+    std::weak_ptr<void>   attr_class_member;
     Nl80211AttributeTypes attr_type;
     AttributeValueTypes   attr_val_type;
     // Operator needed for the std::set at() call.
