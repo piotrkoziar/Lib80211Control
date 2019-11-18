@@ -2,58 +2,50 @@
 #ifndef WIPHYNLCONTROL_COMMUNICATOR_H_
 #define WIPHYNLCONTROL_COMMUNICATOR_H_
 
-#include "Wiphy.h"
+#include <vector>
+#include "Message.h"
 #include "Socket.h"
+#include "Wiphy.h"
 
 typedef struct genlmsghdr NlGeMessageHeader;
-typedef struct nl_msg NlMessage;
 typedef struct sockaddr_nl NlSocketAddress;
-typedef struct nlmsgerr NlErrorMessageHeader;
 
 namespace wiphynlcontrol {
 
-typedef std::set<Entity::AttributeBlock> AttributeSet;
-
 class Communicator {
  private:
-  int             nl80211_family_id_;
-  NlMessage       *message_;
-  int             message_flags_;
-  Nl80211Commands command_;
-  AttributeSet    *attribute_set_;
-  LibnlCallback   *callback_;
-  std::string     error_report_;
+  int nl80211_family_id_;
+  CallbackKind socket_cb_kind_;
+  LibnlCallback *callback_;
+  std::string error_report_;
 
  public:
   Communicator(CallbackKind cb_kind = CALLBACK_DEFAULT);
-  Communicator(CallbackKind cb_kind, Entity *entity, Entity::Commands cmd,
-               void **arg);
 
  private:
-  // Sets attribute_set_ pointer on attribute set address from the entity.
-  // Suitable attribute set is chosen based on the command.
-  // Calls resolve_command() and resolve_attribute_set() from the Entity class.
-  void get_attribute_set(Entity *entity, Entity::Commands cmd);
   // Adds attribute to the message_.
-  void add_attribute(Nl80211AttributeTypes attr_type,
-                     Entity::AttributeValueTypes attr_val_type,
-                     std::weak_ptr<void> attr_value);
-  // Uses the socket to query the kernel for numeric identifier of the Generic
-  // Netlink family name. Sets nl80211_family_id_ with the result.
-  void set_family_id(Socket *socket);
+  void add_attribute(LibnlMessage *message,
+                     std::weak_ptr<Entity::Attribute> attr_arg);
+  // Uses the socket to query the kernel for numeric identifier of the
+  // Generic Netlink family name. Sets nl80211_family_id_ with the result.
+  void set_family_id(LibnlSocket *socket);
   // Sends the message_ and gets the answer.
-  void send_and_receive(Socket *socket);
-
- public:
+  void send_and_receive(
+      LibnlSocket *socket, LibnlMessage *message,
+      std::unique_ptr<std::vector<Entity::Attribute>> attr_read);
   // Gets attributes from the message_.
   // AttributeBlocks from the attribute_set_ are used.
   // Returns immediately if attribute_set_ is not set.
-  void get_attributes(NlMessage *msg);
+  static int get_attributes(LibnlMessage *msg,
+                            const std::vector<Entity::Attribute> &attr_read);
+
+ public:
   // Prepares the message.
   // Calls get_attribute_set() and add_attribute().
   // Sets message_flags_. Adds identifier attributes to the message.
-  void challenge(Socket *socket, Entity *entity, Entity::Commands cmd,
-                 void **arg);
+  void challenge(const Nl80211Commands command, const Message::Flags flags,
+                 std::weak_ptr<Entity::Attribute> attr_arg,
+                 std::unique_ptr<std::vector<Entity::Attribute>> attr_read);
 
  public:
   ~Communicator();
