@@ -13,8 +13,6 @@ class ControlInstance {
       Wiphy *wiphy = new Wiphy(0);
       Communicator *com = new Communicator(CALLBACK_DEBUG);
 
-      com->challenge(sock, wiphy, Entity::Commands::Get, NULL);
-
       std::cout << *wiphy->id_ << "\n";
       std::cout << *wiphy->name_ << "\n";
       std::cout << *wiphy->frequency_ << '\n';

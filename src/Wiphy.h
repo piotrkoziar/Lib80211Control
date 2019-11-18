@@ -1,6 +1,8 @@
 #ifndef WIPHYNLCONTROL_WIPHY_H_
 #define WIPHYNLCONTROL_WIPHY_H_
 
+#define sp_(type) std::shared_ptr<type>
+
 #include "Entity.h"
 
 #include <string>
@@ -9,8 +11,7 @@ namespace wiphynlcontrol {
 
 class Wiphy : public Entity {
  public:
-  Wiphy();
-  explicit Wiphy(const uint32_t id);
+  explicit Wiphy(const uint32_t &id);
 
  public:
   sp_(uint32_t)    id_;
@@ -18,16 +19,9 @@ class Wiphy : public Entity {
   sp_(std::string) address_;
   sp_(uint32_t)    frequency_;
 
- private:
-  // Fills command_map_ and attribute_map_.
-  // Here apply changes related to command - attribute mapping.
-  void setup_maps();
-
  public:
-  // Returns pointer to AttributeBlock with identifier information. TODO
-  virtual AttributeBlock *get_identifier(void **arg);
-  // Gets AttributeBlock for name_ member.
-  AttributeBlock *get_name();
+  // Returns std::weak_ptr pointer to Attribute with identifier information.
+  std::weak_ptr<Attribute> get_identifier();
 };
 
 }  // namespace wiphynlcontrol
