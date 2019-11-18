@@ -10,34 +10,31 @@
 
 typedef struct nlmsghdr LibnlMessageHeader;
 typedef struct nlmsgerr LibnlErrorMessageHeader;
+typedef struct genlmsghdr LibnlGeMessageHeader;
+typedef struct sockaddr_nl LibnlSocketAddress;
 
 namespace wiphynlcontrol {
 
 // Gets the error attribute from the message.
 // Assigns charater string to the arg parameter.
-static int error_handler(NlSocketAddress *nla, LibnlErrorMessageHeader *err,
+static int error_handler(LibnlSocketAddress *nla, LibnlErrorMessageHeader *err,
                          char *arg);
 static int ack_handler(LibnlMessage *msg, void *arg);
 static int finish_handler(LibnlMessage *msg, void *arg);
 
-Communicator::Communicator(CallbackKind cb_kind) : socket_cb_kind_(cb_kind) {
-  // Allocate callback_
+Communicator::Communicator(const CallbackKind &cb_kind)
+    : socket_cb_kind_(cb_kind) {
   callback_ = nl_cb_alloc(static_cast<LibnlCallbackKind>(cb_kind));
   if (!callback_) {
-    throw Exception("Communicator: callback allocation failed");
+    throw Exception("Communicator:Communicator:callback allocation failed");
   }
-  // Resolve family id
+  // Create socket to query the kernel through it.
   auto socket = std::make_unique<Socket>(CALLBACK_DEFAULT);
   set_family_id(socket->get_socket());
 }
 
-void Communicator::add_attribute(LibnlMessage *message,
-                                 std::weak_ptr<Entity::Attribute> attr_arg) {
-  std::shared_ptr<Entity::Attribute> attr = attr_arg.lock();
-  if (!attr) {
-    return;  // Weak pointer points to dead object.
-  }
-
+void Communicator::add_attribute(
+    LibnlMessage *message, const std::unique_ptr<Entity::Attribute> &attr) {
   switch (attr->val_type_) {
     case Entity::Attribute::ValueTypes::UINT32: {
       if (std::shared_ptr<uint32_t> attr_value =
@@ -62,26 +59,30 @@ void Communicator::add_attribute(LibnlMessage *message,
 }
 
 void Communicator::set_family_id(LibnlSocket *socket) {
+  if (!socket) {
+    throw Exception("Communicator:set_family_id:argument is NULL");
+  }
+
   if ((nl80211_family_id_ = genl_ctrl_resolve(socket, "nl80211")) < 0) {
-    throw Exception("Communicator::set_family_id() failed");
+    throw Exception("Communicator:set_family_id:failed");
   }
 }
 
 void Communicator::send_and_receive(
     LibnlSocket *socket, LibnlMessage *message,
-    std::unique_ptr<std::vector<Entity::Attribute>> attr_read) {
+    const std::vector<std::unique_ptr<Entity::Attribute>> &attr_read) {
   if (!socket || !message) {
-    throw Exception("Communicator::send_and_receive(): argument is NULL");
+    throw Exception("Communicator:send_and_receive():argument is NULL");
   }
 
   // Send the message
   if (nl_send_auto(socket, message) < 0) {
     throw Exception(
-        "Communicator::send_and_receive() nl_send_auto() exited with negative \
+        "Communicator:send_and_receive:nl_send_auto: exited with negative \
         error code");
   }
 
-  // Set up callbacks
+  // Set up callbacks.
   int ret = 1;
   nl_cb_err(callback_, NL_CB_CUSTOM,
             reinterpret_cast<nl_recvmsg_err_cb_t>(error_handler),
@@ -90,18 +91,19 @@ void Communicator::send_and_receive(
   nl_cb_set(callback_, NL_CB_ACK, NL_CB_CUSTOM, ack_handler, &ret);
   nl_cb_set(callback_, NL_CB_VALID, NL_CB_CUSTOM,
             reinterpret_cast<nl_recvmsg_msg_cb_t>(get_attributes),
-            attr_read.get());
+            const_cast<void *>(static_cast<const void *>(&attr_read)));
 
   // Get the answer.
   nl_recvmsgs(socket, callback_);
 }
 
 int Communicator::get_attributes(
-    LibnlMessage *msg, const std::vector<Entity::Attribute> &attr_read) {
+    LibnlMessage *msg,
+    const std::vector<std::unique_ptr<Entity::Attribute>> &attr_read) {
   // Get message header
-  NlGeMessageHeader *header;
+  LibnlGeMessageHeader *header;
   if (!(header =
-            static_cast<NlGeMessageHeader *>(nlmsg_data(nlmsg_hdr(msg))))) {
+            static_cast<LibnlGeMessageHeader *>(nlmsg_data(nlmsg_hdr(msg))))) {
     return NL_OK;
   }
   // Get message attributes
@@ -110,7 +112,7 @@ int Communicator::get_attributes(
             genlmsg_attrlen(header, 0), NULL);
 
   void *attribute_value;
-  for (auto it = attr_read.begin(); it != attr_read.end(); ++it) {
+  for (auto &it : attr_read) {
     if (attributes[it->type_]) {
       attribute_value = nla_data(attributes[it->type_]);
       switch (it->val_type_) {
@@ -131,36 +133,35 @@ int Communicator::get_attributes(
 }
 
 void Communicator::challenge(
-    const Nl80211Commands command, const Message::Flags flags,
-    std::weak_ptr<Entity::Attribute> attr_arg,
-    std::unique_ptr<std::vector<Entity::Attribute>> attr_read) {
+    const Nl80211Commands &command, const Message::Flags &flags,
+    const std::unique_ptr<Entity::Attribute> &attr_arg,
+    const std::vector<std::unique_ptr<Entity::Attribute>> &attr_read) {
   auto socket = std::make_unique<Socket>(socket_cb_kind_);
   auto message = std::make_unique<Message>(flags);
 
   // Add Netlink header, Generic Netlink header to the message.
-  if (!genlmsg_put(message->get_message(),  // message
-                   NL_AUTO_PORT,            // port (auto)
-                   NL_AUTO_SEQ,             // sequence (auto)
-                   nl80211_family_id_,      // family (nl80211) id
-                   0,                       // user header len
-                   static_cast<int>(message->get_flags()),  // message flags
-                   command,                                 // command
-                   0))                                      // interface version
+  if (!genlmsg_put(message->get_message(),    // message
+                   NL_AUTO_PORT,              // port (auto)
+                   NL_AUTO_SEQ,               // sequence (auto)
+                   nl80211_family_id_,        // family (nl80211) id
+                   0,                         // user header len
+                   static_cast<int>(flags),  // message flags
+                   command,                  // command
+                   0))                        // interface version
   {
-    throw Exception("Communicator::challenge(): adding message header failed");
+    throw Exception("Communicator:challenge():message header adding failed");
   }
 
   add_attribute(message->get_message(), attr_arg);
 
-  send_and_receive(socket->get_socket(), message->get_message(),
-                   std::move(attr_read));
+  send_and_receive(socket->get_socket(), message->get_message(), attr_read);
 }
 
 Communicator::~Communicator() { nl_cb_put(callback_); }
 
 // Message handlers.
 
-int error_handler(NlSocketAddress *nla, LibnlErrorMessageHeader *err_msg,
+int error_handler(LibnlSocketAddress *nla, LibnlErrorMessageHeader *err_msg,
                   char *arg) {
   /* Example:
 

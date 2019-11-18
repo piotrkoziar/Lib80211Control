@@ -11,8 +11,8 @@ Wiphy::Wiphy(const uint32_t &id)
       address_(std::make_shared<std::string>()),
       frequency_(std::make_shared<uint32_t>()) {}
 
-std::weak_ptr<Entity::Attribute> Wiphy::get_identifier() {
-  return static_cast<std::weak_ptr<Attribute>>(identifier_);
+const std::weak_ptr<Entity::Attribute> Wiphy::get_identifier() const {
+  return identifier_;
 }
 
 }  // namespace wiphynlcontrol

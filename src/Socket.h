@@ -21,13 +21,10 @@ class Socket {
   LibnlCallback *callback_;
 
  public:
-  Socket(CallbackKind cb_kind = CALLBACK_DEFAULT);
+  explicit Socket(const CallbackKind cb_kind = CALLBACK_DEFAULT);
 
  public:
-  // Sets Socket callback.
   void set_callback(const LibnlCallback *cb);
-
-  // Returns pointer to the LibnlSocket member.
   LibnlSocket *get_socket() const;
 
  public:

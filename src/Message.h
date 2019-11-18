@@ -24,15 +24,12 @@ class Message {
   Flags flags_;
 
  public:
-  Message(Flags flags);
+  explicit Message(const Flags &flags);
 
  public:
-  // Returns pointer to the LibnlMessage member.
-  LibnlMessage *get_message();
-  // Returns flags.
-  Flags get_flags();
-  // Sets flags.
-  void set_flags(Flags flags);
+  LibnlMessage *get_message() const;
+  const Flags &get_flags() const;
+  void set_flags(const Flags &flags);
 
  public:
   ~Message();

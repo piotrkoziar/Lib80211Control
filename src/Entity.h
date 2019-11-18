@@ -3,11 +3,12 @@
 
 #include <linux/nl80211.h>
 
-#include <stdint.h>
 #include <memory>
+#include <stdint.h>
+
 
 typedef enum nl80211_commands Nl80211Commands;
-typedef enum nl80211_attrs Nl80211AttributeTypes;
+typedef enum nl80211_attrs    Nl80211AttributeTypes;
 typedef struct nlattr LibnlAttribute;
 
 namespace wiphynlcontrol {
@@ -25,10 +26,9 @@ class Entity {
     const ValueTypes val_type_;
 
    public:
-    Attribute(const std::weak_ptr<void> &class_member,
-              const Nl80211AttributeTypes &type, const ValueTypes &val_type);
-    // Operator needed for the std::set at() call.
-    bool operator<(const struct Attribute &t) const;
+    explicit Attribute(const std::weak_ptr<void> &class_member,
+                       const Nl80211AttributeTypes &type,
+                       const ValueTypes &val_type);
   };
 
  protected:
@@ -40,9 +40,8 @@ class Entity {
          const Attribute::ValueTypes &val_type);
 
  public:
-  // TODO identifier thing should be replaced with specifying the necessary
-  // attribute in the command map.
-  virtual std::weak_ptr<Attribute> get_identifier() = 0;
+  // This member identifies the Entity.
+  virtual const std::weak_ptr<Attribute> get_identifier() const = 0;
 };
 
 }  // namespace wiphynlcontrol
