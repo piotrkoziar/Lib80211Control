@@ -7,18 +7,18 @@
 
 namespace wiphynlcontrol {
 
-Message::Message(Flags flags) : flags_(flags) {
+Message::Message(const Flags &flags) : flags_(flags) {
   message_ = nlmsg_alloc();
   if (!message_) {
     throw Exception("Message:Message:nlmsg_alloc:msg alloc failed");
   }
 }
 
-LibnlMessage *Message::get_message() { return message_; }
+LibnlMessage *Message::get_message() const { return message_; }
 
-Message::Flags Message::get_flags() { return flags_; }
+const Message::Flags &Message::get_flags() const { return flags_; }
 
-void Message::set_flags(Flags flags) { flags_ = flags; }
+void Message::set_flags(const Flags &flags) { flags_ = flags; }
 
 Message::~Message() { nlmsg_free(message_); }
 

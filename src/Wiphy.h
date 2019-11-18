@@ -1,8 +1,6 @@
 #ifndef WIPHYNLCONTROL_WIPHY_H_
 #define WIPHYNLCONTROL_WIPHY_H_
 
-#define sp_(type) std::shared_ptr<type>
-
 #include "Entity.h"
 
 #include <string>
@@ -14,14 +12,14 @@ class Wiphy : public Entity {
   explicit Wiphy(const uint32_t &id);
 
  public:
-  sp_(uint32_t)    id_;
-  sp_(std::string) name_;
-  sp_(std::string) address_;
-  sp_(uint32_t)    frequency_;
+  std::shared_ptr<uint32_t>    id_;
+  std::shared_ptr<std::string> name_;
+  std::shared_ptr<std::string> address_;
+  std::shared_ptr<uint32_t>    frequency_;
 
  public:
-  // Returns std::weak_ptr pointer to Attribute with identifier information.
-  std::weak_ptr<Attribute> get_identifier();
+  // Returns identifier. Overloads abstract method from Entity.
+  const std::weak_ptr<Attribute> get_identifier() const;
 };
 
 }  // namespace wiphynlcontrol
