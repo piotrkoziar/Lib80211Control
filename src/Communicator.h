@@ -5,7 +5,7 @@
 #include <vector>
 #include "Message.h"
 #include "Socket.h"
-#include "Wiphy.h"
+#include "Entity.h"
 
 namespace wiphynlcontrol {
 
