@@ -1,6 +1,6 @@
 
 #include <iostream>
-#include "Communicator.h"
+#include "Wiphy.h"
 
 namespace wiphynlcontrol {
 
@@ -16,6 +16,10 @@ class ControlInstance {
       std::cout << *wiphy->id_ << "\n";
       std::cout << *wiphy->name_ << "\n";
       std::cout << *wiphy->frequency_ << '\n';
+
+      free(sock);
+      free(wiphy);
+      free(com);
     } catch (std::exception &e) {
       std::cout << "Exception: " << e.what() << "\n";
     }

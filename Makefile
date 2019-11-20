@@ -6,6 +6,7 @@ CFLAGS ?= -O0 -g
 CFLAGS += -Wall -Wextra -Wundef -Wno-trigraphs -fno-strict-aliasing -fno-common \
 	  -Werror-implicit-function-declaration -Wsign-compare -Wno-unused-parameter
 CFLAGS += -DCONFIG_LIBNL30
+CFLAGS += -std=c++1z
 CFLAGS += $(shell $(PKG_CONFIG) --cflags $(NLLIBNAME))
 # debug level
 # 0 [Debugging disabled] ... 5 [less important messages]

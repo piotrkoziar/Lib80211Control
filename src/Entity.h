@@ -3,9 +3,10 @@
 
 #include <linux/nl80211.h>
 
-#include <memory>
 #include <stdint.h>
-
+#include <memory>
+#include <string>
+#include <variant>
 
 typedef enum nl80211_commands Nl80211Commands;
 typedef enum nl80211_attrs    Nl80211AttributeTypes;
@@ -26,16 +27,15 @@ class Entity {
     const ValueTypes val_type_;
 
    public:
-    explicit Attribute(const std::weak_ptr<void> &class_member,
-                       const Nl80211AttributeTypes &type,
-                       const ValueTypes &val_type);
+    Attribute(const std::weak_ptr<void> class_member,
+              const Nl80211AttributeTypes &type, const ValueTypes &val_type);
   };
 
  protected:
   const std::shared_ptr<Attribute> identifier_;
 
  protected:
-  Entity(const std::weak_ptr<void> &identifier,
+  Entity(const std::weak_ptr<void> identifier,
          const Nl80211AttributeTypes &type,
          const Attribute::ValueTypes &val_type);
 

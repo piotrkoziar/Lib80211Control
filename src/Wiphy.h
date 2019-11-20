@@ -1,9 +1,9 @@
 #ifndef WIPHYNLCONTROL_WIPHY_H_
 #define WIPHYNLCONTROL_WIPHY_H_
 
-#include "Entity.h"
-
 #include <string>
+#include "Communicator.h"
+#include "Entity.h"
 
 namespace wiphynlcontrol {
 
@@ -20,6 +20,8 @@ class Wiphy : public Entity {
  public:
   // Returns identifier. Overloads abstract method from Entity.
   const std::weak_ptr<Attribute> get_identifier() const;
+  // Uses Communicator to query the kernel.
+  void set_name(const Communicator &com);
 };
 
 }  // namespace wiphynlcontrol

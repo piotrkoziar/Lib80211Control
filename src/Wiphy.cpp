@@ -15,4 +15,11 @@ const std::weak_ptr<Entity::Attribute> Wiphy::get_identifier() const {
   return identifier_;
 }
 
+void Wiphy::set_name(const Communicator &com) {
+  std::vector<std::unique_ptr<Entity::Attribute>> attr_vec = {
+    std::make_unique<Entity::Attribute>(name_, NL80211_ATTR_WIPHY_NAME,
+                                        Attribute::ValueTypes::STRING)
+  };
+}
+
 }  // namespace wiphynlcontrol
