@@ -17,6 +17,12 @@ class ControlInstance {
       std::cout << *wiphy->name_ << "\n";
       std::cout << *wiphy->frequency_ << '\n';
 
+      wiphy->set_name(*com);
+
+      std::cout << *wiphy->id_ << "\n";
+      std::cout << *wiphy->name_ << "\n";
+      std::cout << *wiphy->frequency_ << '\n';
+
       free(sock);
       free(wiphy);
       free(com);

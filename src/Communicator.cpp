@@ -33,17 +33,17 @@ Communicator::Communicator(const CallbackKind &cb_kind)
   set_family_id(socket->get_socket());
 }
 
-void Communicator::add_attribute(
-    LibnlMessage *message, const std::unique_ptr<Entity::Attribute> &attr) {
+void Communicator::add_attribute(LibnlMessage *message,
+                                 const std::unique_ptr<Attribute> &attr) {
   switch (attr->val_type_) {
-    case Entity::Attribute::ValueTypes::UINT32: {
+    case Attribute::ValueTypes::UINT32: {
       if (std::shared_ptr<uint32_t> attr_value =
               std::static_pointer_cast<uint32_t>(attr->class_member_.lock())) {
         NLA_PUT_U32(message, attr->type_, *attr_value);
       }
       break;
     }
-    case Entity::Attribute::ValueTypes::STRING: {
+    case Attribute::ValueTypes::STRING: {
       if (std::shared_ptr<std::string> attr_value =
               std::static_pointer_cast<std::string>(
                   attr->class_member_.lock())) {
@@ -70,7 +70,7 @@ void Communicator::set_family_id(LibnlSocket *socket) {
 
 void Communicator::send_and_receive(
     LibnlSocket *socket, LibnlMessage *message,
-    const std::vector<std::unique_ptr<Entity::Attribute>> &attr_read) {
+    const std::vector<std::unique_ptr<Attribute>> &attr_read) {
   if (!socket || !message) {
     throw Exception("Communicator:send_and_receive():argument is NULL");
   }
@@ -99,7 +99,7 @@ void Communicator::send_and_receive(
 
 int Communicator::get_attributes(
     LibnlMessage *msg,
-    const std::vector<std::unique_ptr<Entity::Attribute>> &attr_read) {
+    const std::vector<std::unique_ptr<Attribute>> &attr_read) {
   // Get message header
   LibnlGeMessageHeader *header;
   if (!(header =
@@ -117,12 +117,12 @@ int Communicator::get_attributes(
       attribute_value = nla_data(attributes[it->type_]);
       switch (it->val_type_) {
         default:
-        case Entity::Attribute::ValueTypes::UINT32:
+        case Attribute::ValueTypes::UINT32:
           *std::static_pointer_cast<uint32_t>(it->class_member_.lock()) =
               *static_cast<uint32_t *>(attribute_value);
           break;
 
-        case Entity::Attribute::ValueTypes::STRING:
+        case Attribute::ValueTypes::STRING:
           *std::static_pointer_cast<std::string>(it->class_member_.lock()) =
               static_cast<const char *>(attribute_value);
           break;
@@ -134,22 +134,22 @@ int Communicator::get_attributes(
 
 void Communicator::challenge(
     const Nl80211Commands &command, const Message::Flags &flags,
-    const std::unique_ptr<Entity::Attribute> &attr_arg,
-    const std::vector<std::unique_ptr<Entity::Attribute>> &attr_read) {
+    const std::unique_ptr<Attribute> &attr_arg,
+    const std::vector<std::unique_ptr<Attribute>> &attr_read) {
   auto socket = std::make_unique<Socket>(socket_cb_kind_);
   auto message = std::make_unique<Message>(flags);
 
   // Add Netlink header, Generic Netlink header to the message.
-  if (!genlmsg_put(message->get_message(),    // message
-                   NL_AUTO_PORT,              // port (auto)
-                   NL_AUTO_SEQ,               // sequence (auto)
-                   nl80211_family_id_,        // family (nl80211) id
-                   0,                         // user header len
+  if (!genlmsg_put(message->get_message(),   // message
+                   NL_AUTO_PORT,             // port (auto)
+                   NL_AUTO_SEQ,              // sequence (auto)
+                   nl80211_family_id_,       // family (nl80211) id
+                   0,                        // user header len
                    static_cast<int>(flags),  // message flags
                    command,                  // command
-                   0))                        // interface version
+                   0))                       // interface version
   {
-    throw Exception("Communicator:challenge():message header adding failed");
+    throw Exception("Communicator:challenge:message header adding failed");
   }
 
   add_attribute(message->get_message(), attr_arg);
