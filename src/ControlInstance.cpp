@@ -1,8 +1,28 @@
 
 #include <iostream>
+#include <variant>
 #include "Wiphy.h"
 
 namespace wiphynlcontrol {
+
+static void print(const std::string &a, const char *args) {
+  std::cout << args << " " << a << '\n';
+}
+
+static void print(const uint32_t &a, const char *args) {
+  std::cout << args << " " << a << '\n';
+}
+
+static void print_wiphy(const Wiphy &wiphy) {
+
+  print(*wiphy.name_, "name");
+  print(*wiphy.id_, "id");
+  print(*wiphy.bands_, "bands");
+  print(*wiphy.channel_type_, "channel_type");
+  print(*wiphy.txq_params_, "txq_params");
+  print(*wiphy.frequency_, "frequency");
+
+}
 
 class ControlInstance {
  public:
@@ -13,15 +33,11 @@ class ControlInstance {
       Wiphy *wiphy = new Wiphy(0);
       Communicator *com = new Communicator(CALLBACK_DEBUG);
 
-      std::cout << *wiphy->id_ << "\n";
-      std::cout << *wiphy->name_ << "\n";
-      std::cout << *wiphy->frequency_ << '\n';
+      print_wiphy(*wiphy);
 
       wiphy->set_name(*com);
 
-      std::cout << *wiphy->id_ << "\n";
-      std::cout << *wiphy->name_ << "\n";
-      std::cout << *wiphy->frequency_ << '\n';
+      print_wiphy(*wiphy);
 
       free(sock);
       free(wiphy);
