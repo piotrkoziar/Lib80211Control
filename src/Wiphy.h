@@ -11,14 +11,14 @@ class Wiphy : public Entity {
   explicit Wiphy(const uint32_t &id);
 
  public:
-  Property index_;
-  Property name_;
+  Property<uint32_t> index_;
+  Property<std::string> name_;
 
  public:
   // Returns identifier. Overloads abstract method from Entity.
-  const Attribute &get_identifier() const;
-  // Uses Communicator to query the kernel.
-  void set_name(Communicator &com);
+  const uint32_t &get_identifier() const;
+  // Overload abstract method from Entity.
+  void set_identifier(const uint32_t &id);
 };
 
 }  // namespace wiphynlcontrol

@@ -15,7 +15,7 @@ static void print(const uint32_t &a, const char *args) {
 
 static void print_wiphy(const Wiphy &wiphy) {
 
-  print(std::get<std::string>(wiphy.name_.attr_.value), "name");
+  print(wiphy.index_.get(), "index");
   // print(*wiphy.id_, "id");
   // print(*wiphy.bands_, "bands");
   // print(*wiphy.channel_type_, "channel_type");
@@ -32,9 +32,13 @@ class ControlInstance {
       Wiphy *wiphy = new Wiphy(0);
       Communicator *com = new Communicator(CALLBACK_DEBUG);
 
+      std::cout << "D10\n";
+
       print_wiphy(*wiphy);
 
-      wiphy->set_name(*com);
+      std::cout << "D12\n";
+
+      wiphy->index_.set(12);
 
       print_wiphy(*wiphy);
 

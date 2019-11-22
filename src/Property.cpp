@@ -7,13 +7,23 @@ Attribute::Attribute(const std::variant<std::string, uint32_t> &val,
                      const ValueTypes &val_type)
     : value(val), type(type), val_type(val_type) {}
 
-Property::Property(const Nl80211AttributeTypes &type,
-                   const Attribute::ValueTypes &val_type,
-                   const Nl80211Commands &cmd)
+template <typename T>
+Property<T>::Property(const Nl80211AttributeTypes &type,
+                      const Attribute::ValueTypes &val_type,
+                      const Nl80211Commands &cmd)
     : attr_(0, type, val_type), cmd_(cmd) {}
 
-const Attribute &Property::get() const {
-  return attr_;
+template <typename T>
+const T &Property<T>::get() const {
+  return std::get<T>(attr_.value);
 }
+
+template <typename T>
+void Property<T>::set(T val) {
+  attr_.value = val;
+}
+
+template class Property<uint32_t>;
+template class Property<std::string>;
 
 }  // namespace wiphynlcontrol

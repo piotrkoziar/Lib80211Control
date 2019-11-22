@@ -21,6 +21,7 @@ struct Attribute {
             const Nl80211AttributeTypes &type, const ValueTypes &val_type);
 };
 
+template <typename T>
 class Property {
  public:
   Attribute attr_;
@@ -30,7 +31,8 @@ class Property {
   Property(const Nl80211AttributeTypes &type,
            const Attribute::ValueTypes &val_type, const Nl80211Commands &cmd);
 
-  const Attribute &get() const;
+  const T &get() const;
+  void set(T val);
 };
 
 }  // namespace wiphynlcontrol
