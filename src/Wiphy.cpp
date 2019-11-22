@@ -11,12 +11,8 @@ Wiphy::Wiphy(const uint32_t &id)
       name_(NL80211_ATTR_WIPHY_NAME, Attribute::ValueTypes::STRING,
             NL80211_CMD_GET_WIPHY) {}
 
-const uint32_t &Wiphy::get_identifier() const {
-  return index_.get();
-}
+const uint32_t &Wiphy::get_identifier() const { return index_.get_value(); }
 
-void Wiphy::set_identifier(const uint32_t &id) {
-  index_.set(id);
-}
+void Wiphy::set_identifier(const uint32_t &id) { index_.set_value(id); }
 
 }  // namespace wiphynlcontrol
