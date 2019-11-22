@@ -17,7 +17,7 @@ class Wiphy : public Entity {
  public:
   // Returns identifier. Overloads abstract method from Entity.
   const uint32_t &get_identifier() const;
-  // Overload abstract method from Entity.
+  // Overloads abstract method from Entity.
   void set_identifier(const uint32_t &id);
 };
 

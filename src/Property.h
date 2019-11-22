@@ -31,8 +31,8 @@ class Property {
   Property(const Nl80211AttributeTypes &type,
            const Attribute::ValueTypes &val_type, const Nl80211Commands &cmd);
 
-  const T &get() const;
-  void set(T val);
+  const T &get_value() const;
+  void set_value(T val);
 };
 
 }  // namespace wiphynlcontrol
