@@ -15,13 +15,12 @@ static void print(const uint32_t &a, const char *args) {
 
 static void print_wiphy(const Wiphy &wiphy) {
 
-  print(*wiphy.name_, "name");
-  print(*wiphy.id_, "id");
-  print(*wiphy.bands_, "bands");
-  print(*wiphy.channel_type_, "channel_type");
-  print(*wiphy.txq_params_, "txq_params");
-  print(*wiphy.frequency_, "frequency");
-
+  print(std::get<std::string>(wiphy.name_.attr_.value), "name");
+  // print(*wiphy.id_, "id");
+  // print(*wiphy.bands_, "bands");
+  // print(*wiphy.channel_type_, "channel_type");
+  // print(*wiphy.txq_params_, "txq_params");
+  // print(*wiphy.frequency_, "frequency");
 }
 
 class ControlInstance {
