@@ -33,22 +33,15 @@ Communicator::Communicator(const CallbackKind &cb_kind)
   set_family_id(socket->get_socket());
 }
 
-void Communicator::add_attribute(LibnlMessage *message,
-                                 const std::unique_ptr<Attribute> &attr) {
-  switch (attr->val_type_) {
+void Communicator::add_attribute(LibnlMessage *message, const Attribute &attr) {
+  switch (attr.val_type) {
     case Attribute::ValueTypes::UINT32: {
-      if (std::shared_ptr<uint32_t> attr_value =
-              std::static_pointer_cast<uint32_t>(attr->class_member_.lock())) {
-        NLA_PUT_U32(message, attr->type_, *attr_value);
-      }
+      NLA_PUT_U32(message, attr.type, std::get<uint32_t>(attr.value));
       break;
     }
     case Attribute::ValueTypes::STRING: {
-      if (std::shared_ptr<std::string> attr_value =
-              std::static_pointer_cast<std::string>(
-                  attr->class_member_.lock())) {
-        NLA_PUT_STRING(message, attr->type_, (*attr_value).c_str());
-      };
+      NLA_PUT_STRING(message, attr.type,
+                     std::get<std::string>(attr.value).c_str());
       break;
     }
     default: {
@@ -68,9 +61,8 @@ void Communicator::set_family_id(LibnlSocket *socket) {
   }
 }
 
-void Communicator::send_and_receive(
-    LibnlSocket *socket, LibnlMessage *message,
-    const std::vector<std::unique_ptr<Attribute>> &attr_read) {
+void Communicator::send_and_receive(LibnlSocket *socket, LibnlMessage *message,
+                                    std::vector<Attribute> &attr_read) {
   if (!socket || !message) {
     throw Exception("Communicator:send_and_receive():argument is NULL");
   }
@@ -97,9 +89,8 @@ void Communicator::send_and_receive(
   nl_recvmsgs(socket, callback_);
 }
 
-int Communicator::get_attributes(
-    LibnlMessage *msg,
-    const std::vector<std::unique_ptr<Attribute>> &attr_read) {
+int Communicator::get_attributes(LibnlMessage *msg,
+                                 std::vector<Attribute> &attr_read) {
   // Get message header
   LibnlGeMessageHeader *header;
   if (!(header =
@@ -113,18 +104,16 @@ int Communicator::get_attributes(
 
   void *attribute_value;
   for (auto &it : attr_read) {
-    if (attributes[it->type_]) {
-      attribute_value = nla_data(attributes[it->type_]);
-      switch (it->val_type_) {
+    if (attributes[it.type]) {
+      attribute_value = nla_data(attributes[it.type]);
+      switch (it.val_type) {
         default:
         case Attribute::ValueTypes::UINT32:
-          *std::static_pointer_cast<uint32_t>(it->class_member_.lock()) =
-              *static_cast<uint32_t *>(attribute_value);
+          it.value = *static_cast<uint32_t *>(attribute_value);
           break;
 
         case Attribute::ValueTypes::STRING:
-          *std::static_pointer_cast<std::string>(it->class_member_.lock()) =
-              static_cast<const char *>(attribute_value);
+          it.value = static_cast<const char *>(attribute_value);
           break;
       }
     }
@@ -132,10 +121,10 @@ int Communicator::get_attributes(
   return NL_OK;
 }
 
-void Communicator::challenge(
-    const Nl80211Commands &command, const Message::Flags &flags,
-    const std::unique_ptr<Attribute> &attr_arg,
-    const std::vector<std::unique_ptr<Attribute>> &attr_read) {
+void Communicator::challenge(const Nl80211Commands &command,
+                             const Message::Flags &flags,
+                             const Attribute &attr_arg,
+                             std::vector<Attribute> &attr_read) {
   auto socket = std::make_unique<Socket>(socket_cb_kind_);
   auto message = std::make_unique<Message>(flags);
 

@@ -2,7 +2,7 @@
 #define WIPHYNLCONTROL_ENTITY_H_
 
 #include <memory>
-#include "Attribute.h"
+#include "Property.h"
 #include "Communicator.h"
 
 namespace wiphynlcontrol {
@@ -11,7 +11,7 @@ namespace wiphynlcontrol {
 class Entity {
  public:
   // This member identifies the Entity.
-  virtual const std::unique_ptr<Attribute> get_identifier() const = 0;
+  virtual const Attribute &get_identifier() const = 0;
 };
 
 }  // namespace wiphynlcontrol
