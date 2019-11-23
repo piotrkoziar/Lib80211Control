@@ -27,10 +27,10 @@ class Communicator {
   void set_family_id(LibnlSocket *socket);
   // Sends the message_ and gets the answer.
   void send_and_receive(LibnlSocket *socket, LibnlMessage *message,
-                        std::vector<Attribute> &attr_read);
+                        std::vector<Attribute *> &attr_read);
   // Gets attributes from the message. Use as callback.
   static int get_attributes(LibnlMessage *msg,
-                            std::vector<Attribute> &attr_read);
+                            std::vector<Attribute *> &attr_read);
 
  public:
   // Prepares message and socket. Uses given command and
@@ -39,7 +39,8 @@ class Communicator {
   // identifier.
   // @param attr_read - attributes expected to be present in kernel's response.
   void challenge(const Nl80211Commands &command, const Message::Flags &flags,
-                 const Attribute &attr_arg, std::vector<Attribute> &attr_read);
+                 const Attribute &attr_arg,
+                 std::vector<Attribute *> &attr_read);
   void set_callback_kind(const CallbackKind &kind);
 
  public:

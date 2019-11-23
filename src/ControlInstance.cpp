@@ -35,6 +35,7 @@ class ControlInstance {
 
       print_wiphy(*wiphy);
 
+      wiphy->name_.get();
       wiphy->index_.set_value(12);
 
       print_wiphy(*wiphy);

@@ -25,10 +25,11 @@ void Property<T>::set_value(T val) {
 
 template <typename T>
 const T &Property<T>::get() {
-  std::vector<Attribute> v = { attr_ };
+  std::vector<Attribute *> attr_vec = std::vector<Attribute *>{&attr_};
   ComControl::get_communicator().challenge(cmd_, Message::Flags::MATCH,
                                            owner_identifier_,
-                                           v);
+                                           attr_vec);
+  return std::get<T>(attr_.value);
 }
 
 template class Property<uint32_t>;

@@ -61,7 +61,7 @@ void Communicator::set_family_id(LibnlSocket *socket) {
 }
 
 void Communicator::send_and_receive(LibnlSocket *socket, LibnlMessage *message,
-                                    std::vector<Attribute> &attr_read) {
+                                    std::vector<Attribute *> &attr_read) {
   if (!socket || !message) {
     throw Exception("Communicator:send_and_receive():argument is NULL");
   }
@@ -89,7 +89,7 @@ void Communicator::send_and_receive(LibnlSocket *socket, LibnlMessage *message,
 }
 
 int Communicator::get_attributes(LibnlMessage *msg,
-                                 std::vector<Attribute> &attr_read) {
+                                 std::vector<Attribute *> &attr_read) {
   // Get message header
   LibnlGeMessageHeader *header;
   if (!(header =
@@ -103,16 +103,17 @@ int Communicator::get_attributes(LibnlMessage *msg,
 
   void *attribute_value;
   for (auto &it : attr_read) {
-    if (attributes[it.type]) {
-      attribute_value = nla_data(attributes[it.type]);
-      switch (it.val_type) {
+    if (attributes[it->type]) {
+      attribute_value = nla_data(attributes[it->type]);
+      switch (it->val_type) {
         default:
         case Attribute::ValueTypes::UINT32:
-          it.value = *static_cast<uint32_t *>(attribute_value);
+          it->value = *static_cast<uint32_t *>(attribute_value);
           break;
 
         case Attribute::ValueTypes::STRING:
-          it.value = static_cast<const char *>(attribute_value);
+          it->value = static_cast<const char *>(attribute_value);
+          // std::cout << std::get<std::string>(it->value) << std::endl;
           break;
       }
     }
@@ -123,7 +124,7 @@ int Communicator::get_attributes(LibnlMessage *msg,
 void Communicator::challenge(const Nl80211Commands &command,
                              const Message::Flags &flags,
                              const Attribute &attr_arg,
-                             std::vector<Attribute> &attr_read) {
+                             std::vector<Attribute *> &attr_read) {
   auto socket = std::make_unique<Socket>(socket_cb_kind_);
   auto message = std::make_unique<Message>(flags);
 
