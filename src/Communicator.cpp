@@ -4,7 +4,6 @@
 #include <netlink/genl/genl.h>
 #include <netlink/netlink.h>
 
-#include <iostream>
 #include <memory>
 #include "Exception.h"
 
@@ -144,6 +143,10 @@ void Communicator::challenge(const Nl80211Commands &command,
   add_attribute(message->get_message(), attr_arg);
 
   send_and_receive(socket->get_socket(), message->get_message(), attr_read);
+}
+
+void Communicator::set_callback_kind(const CallbackKind &kind) {
+  socket_cb_kind_ = kind;
 }
 
 Communicator::~Communicator() { nl_cb_put(callback_); }

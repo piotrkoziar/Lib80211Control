@@ -3,8 +3,8 @@
 #define WIPHYNLCONTROL_COMMUNICATOR_H_
 
 #include <vector>
-#include "Property.h"
 #include "Message.h"
+#include "Property.h"
 #include "Socket.h"
 
 namespace wiphynlcontrol {
@@ -40,6 +40,7 @@ class Communicator {
   // @param attr_read - attributes expected to be present in kernel's response.
   void challenge(const Nl80211Commands &command, const Message::Flags &flags,
                  const Attribute &attr_arg, std::vector<Attribute> &attr_read);
+  void set_callback_kind(const CallbackKind &kind);
 
  public:
   ~Communicator();

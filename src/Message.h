@@ -4,8 +4,6 @@
 
 #include <linux/netlink.h>
 
-#include <memory>
-
 typedef struct nl_msg LibnlMessage;
 
 namespace wiphynlcontrol {

@@ -1,39 +1,35 @@
-#ifndef WIPHYNLCONTROL_ATTRIBUTE_H_
-#define WIPHYNLCONTROL_ATTRIBUTE_H_
+#ifndef WIPHYNLCONTROL_PROPERTY_H_
+#define WIPHYNLCONTROL_PROPERTY_H_
 
 #include <linux/nl80211.h>
 
-#include <memory>
-#include <variant>
+#include "Attribute.h"
 
 typedef enum nl80211_commands Nl80211Commands;
-typedef enum nl80211_attrs Nl80211AttributeTypes;
-typedef struct nlattr LibnlAttribute;
 
 namespace wiphynlcontrol {
 
-struct Attribute {
-  enum class ValueTypes { UINT32, STRING };
-  std::variant<std::string, uint32_t> value;
-  const Nl80211AttributeTypes type;
-  const ValueTypes val_type;
-  Attribute(const std::variant<std::string, uint32_t> &value,
-            const Nl80211AttributeTypes &type, const ValueTypes &val_type);
-};
-
+//  Typename should be std::string or uint32_t.
 template <typename T>
 class Property {
- public:
+  friend class Entity;
+
+ private:
+  Attribute owner_identifier_;
   Attribute attr_;
   const Nl80211Commands cmd_;
 
  public:
-  Property(const Nl80211AttributeTypes &type,
-           const Attribute::ValueTypes &val_type, const Nl80211Commands &cmd);
+  explicit Property(const Attribute &owner_id,
+                    const Nl80211AttributeTypes &type,
+                    const Attribute::ValueTypes &val_type,
+                    const Nl80211Commands &cmd);
 
   const T &get_value() const;
   void set_value(T val);
+  // In this case, query the kernel.
+  const T &get();
 };
 
 }  // namespace wiphynlcontrol
-#endif  // defined WIPHYNLCONTROL_ATTRIBUTE_H_
+#endif  // defined WIPHYNLCONTROL_PROPERTY_H_
