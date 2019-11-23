@@ -1,6 +1,8 @@
 
 #include <iostream>
+#include <memory>
 #include <variant>
+#include "Communicator.h"
 #include "Wiphy.h"
 
 namespace wiphynlcontrol {
@@ -28,8 +30,8 @@ class ControlInstance {
     try {
       // Test
       Socket *sock = new Socket(CALLBACK_DEBUG);
+      auto com = std::make_shared<Communicator>(CALLBACK_DEBUG);
       Wiphy *wiphy = new Wiphy(0);
-      Communicator *com = new Communicator(CALLBACK_DEBUG);
 
       print_wiphy(*wiphy);
 
@@ -37,9 +39,8 @@ class ControlInstance {
 
       print_wiphy(*wiphy);
 
-      free(sock);
-      free(wiphy);
-      free(com);
+      delete (sock);
+      delete (wiphy);
     } catch (std::exception &e) {
       std::cout << "Exception: " << e.what() << "\n";
     }

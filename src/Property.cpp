@@ -1,17 +1,17 @@
 #include "Property.h"
-#include <iostream>
+
+#include <string>
+#include "ComControl.h"
+#include "Message.h"
+
 namespace wiphynlcontrol {
 
-Attribute::Attribute(const std::variant<std::string, uint32_t> &val,
-                     const Nl80211AttributeTypes &type,
-                     const ValueTypes &val_type)
-    : value(val), type(type), val_type(val_type) {}
-
 template <typename T>
-Property<T>::Property(const Nl80211AttributeTypes &type,
+Property<T>::Property(const Attribute &owner_id,
+                      const Nl80211AttributeTypes &type,
                       const Attribute::ValueTypes &val_type,
                       const Nl80211Commands &cmd)
-    : attr_(T(), type, val_type), cmd_(cmd) {}
+    : owner_identifier_(owner_id), attr_(T(), type, val_type), cmd_(cmd) {}
 
 template <typename T>
 const T &Property<T>::get_value() const {
@@ -21,6 +21,14 @@ const T &Property<T>::get_value() const {
 template <typename T>
 void Property<T>::set_value(T val) {
   attr_.value = val;
+}
+
+template <typename T>
+const T &Property<T>::get() {
+  std::vector<Attribute> v = { attr_ };
+  ComControl::get_communicator().challenge(cmd_, Message::Flags::MATCH,
+                                           owner_identifier_,
+                                           v);
 }
 
 template class Property<uint32_t>;
