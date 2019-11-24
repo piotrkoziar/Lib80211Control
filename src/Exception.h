@@ -2,18 +2,20 @@
 #define WIPHYNLCONTROL_EXCEPTION_H_
 
 #include <exception>
+#include <string>
 
 namespace wiphynlcontrol {
 
 class Exception : public std::exception {
  private:
-  const char* info_;
+  const std::string info_;
 
  public:
-  explicit Exception(const char* info = "");
+  explicit Exception(const std::string &info = "");
 
  public:
-  const char* what() const noexcept { return this->info_; }
+  const char *what() const noexcept;
+  static const std::string err_to_str(const int &code);
 
 };  // Exception
 

@@ -8,12 +8,14 @@ Wiphy::Wiphy(const uint32_t &id)
       index_(Attribute(id, NL80211_ATTR_WIPHY, Attribute::ValueTypes::UINT32),
              NL80211_ATTR_WIPHY,
              Attribute::ValueTypes::UINT32,
-             NL80211_CMD_GET_WIPHY),
+             NL80211_CMD_GET_WIPHY,
+             NL80211_CMD_SET_WIPHY),
       // Initialization of other Wiphy properties
       name_(get_attributes(index_),
             NL80211_ATTR_WIPHY_NAME,
             Attribute::ValueTypes::STRING,
-            NL80211_CMD_GET_WIPHY) {}
+            NL80211_CMD_GET_WIPHY,
+            NL80211_CMD_SET_WIPHY) {}
 
 const uint32_t &Wiphy::get_identifier() const { return index_.get_value(); }
 
