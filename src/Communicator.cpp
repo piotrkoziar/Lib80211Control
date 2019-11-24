@@ -32,8 +32,8 @@ Communicator::Communicator(const CallbackKind &cb_kind)
   set_family_id(socket->get_socket());
 }
 
-void Communicator::add_attributes(LibnlMessage *message,
-                                  const std::vector<Attribute *> *attr_arg) {
+void Communicator::add_attributes(
+    LibnlMessage *message, const std::vector<const Attribute *> *attr_arg) {
   if (!message) {
     throw Exception("Communicator:add_attribute:argument message is NULL");
   } else if (!attr_arg) {
@@ -70,7 +70,7 @@ void Communicator::set_family_id(LibnlSocket *socket) {
 }
 
 void Communicator::send_and_receive(LibnlSocket *socket, LibnlMessage *message,
-                                    std::vector<Attribute *> *attr_read) {
+                                    const std::vector<Attribute *> *attr_read) {
   if (!socket || !message) {
     throw Exception("Communicator:send_and_receive:argument is NULL");
   }
@@ -96,7 +96,7 @@ void Communicator::send_and_receive(LibnlSocket *socket, LibnlMessage *message,
 }
 
 int Communicator::get_attributes(LibnlMessage *msg,
-                                 std::vector<Attribute *> *attr_read) {
+                                 const std::vector<Attribute *> *attr_read) {
   if (!attr_read) {
     return NL_OK;  // No attributes was specified to read from message.
   }
@@ -132,8 +132,8 @@ int Communicator::get_attributes(LibnlMessage *msg,
 
 void Communicator::challenge(const Nl80211Commands &command,
                              const Message::Flags &flags,
-                             const std::vector<Attribute *> *attr_arg,
-                             std::vector<Attribute *> *attr_read) {
+                             const std::vector<const Attribute *> *attr_arg,
+                             const std::vector<Attribute *> *attr_read) {
   auto socket = std::make_unique<Socket>(socket_cb_kind_);
   auto message = std::make_unique<Message>(flags);
 

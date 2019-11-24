@@ -5,13 +5,13 @@ namespace wiphynlcontrol {
 Wiphy::Wiphy(const uint32_t &id)
     : Entity(),
       // Index is Wiphy's identifier. Must be initialized first.
-      index_(Attribute(id, NL80211_ATTR_WIPHY, Attribute::ValueTypes::UINT32),
+      index_(&get_attributes(index_),
              NL80211_ATTR_WIPHY,
              Attribute::ValueTypes::UINT32,
              NL80211_CMD_GET_WIPHY,
              NL80211_CMD_SET_WIPHY),
       // Initialization of other Wiphy properties
-      name_(get_attributes(index_),
+      name_(&get_attributes(index_),
             NL80211_ATTR_WIPHY_NAME,
             Attribute::ValueTypes::STRING,
             NL80211_CMD_GET_WIPHY,
