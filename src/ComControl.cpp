@@ -5,7 +5,7 @@
 
 namespace wiphynlcontrol {
 std::unique_ptr<Communicator> ComControl::com_ =
-#if COM_DEBUG == 1
+#if COM_DEBUG>0
     std::make_unique<Communicator>(CALLBACK_DEBUG);
 #else
     std::make_unique<Communicator>(CALLBACK_DEFAULT);
