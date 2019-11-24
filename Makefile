@@ -8,6 +8,11 @@ CFLAGS += -Wall -Wextra -Wundef -Wno-trigraphs -fno-strict-aliasing -fno-common 
 CFLAGS += -DCONFIG_LIBNL30
 CFLAGS += -std=c++1z
 CFLAGS += $(shell $(PKG_CONFIG) --cflags $(NLLIBNAME))
+
+ifdef DEBUG
+CFLAGS += -DCOM_DEBUG=$(DEBUG)
+endif
+
 # debug level
 # 0 [Debugging disabled] ... 5 [less important messages]
 CFLAGS += -DNLDBG=4 -DNLCB=debug

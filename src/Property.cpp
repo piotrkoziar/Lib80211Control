@@ -8,13 +8,13 @@
 namespace wiphynlcontrol {
 
 template <typename T>
-Property<T>::Property(const Attribute &owner_id,
+Property<T>::Property(const Attribute *owner_id,
                       const Nl80211AttributeTypes &type,
                       const Attribute::ValueTypes &value_type,
                       const Nl80211Commands &cmd_get,
                       const Nl80211Commands &cmd_set)
-    : owner_identifier_(owner_id),
-      attr_(T(), type, value_type),
+    : attr_(T(), type, value_type),
+      owner_identifier_(owner_id),
       cmd_get_(cmd_get),
       cmd_set_(cmd_set) {}
 
@@ -30,8 +30,8 @@ void Property<T>::set_value(T val) {
 
 template <typename T>
 const T &Property<T>::get() {
-  auto attr_args = std::vector<Attribute *>{&owner_identifier_};
-  auto attr_read = std::vector<Attribute *>{&attr_};
+  const auto attr_args = std::vector<const Attribute *>{owner_identifier_};
+  const auto attr_read = std::vector<Attribute *>{&attr_};
   ComControl::get_communicator().challenge(cmd_get_, Message::Flags::MATCH,
                                            &attr_args, &attr_read);
   return std::get<T>(attr_.value);
@@ -42,7 +42,8 @@ void Property<T>::set(const T &arg) {
   // Create attribute object with new value.
   Attribute attr_arg(arg, attr_.type, attr_.value_type);
   // Place the object in the vactor and add to the request for the Communicator.
-  auto attr_args = std::vector<Attribute *>{&owner_identifier_, &attr_arg};
+  const auto attr_args =
+      std::vector<const Attribute *>{owner_identifier_, &attr_arg};
   ComControl::get_communicator().challenge(cmd_set_, Message::Flags::NONE,
                                            &attr_args, NULL);
   // Check if error callback reported error.

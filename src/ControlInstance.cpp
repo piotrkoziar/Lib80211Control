@@ -37,8 +37,8 @@ class ControlInstance {
       print_wiphy(*wiphy.get());
       wiphy->name_.set("phy00");
       wiphy->name_.get();
-      wiphy->index_.set_value(12);
       print_wiphy(*wiphy.get());
+      wiphy->index_.set_value(0);
       wiphy->name_.set("phy0");
 
     } catch (std::exception &e) {

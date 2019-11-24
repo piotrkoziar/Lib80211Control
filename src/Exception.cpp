@@ -16,6 +16,9 @@ const std::string Exception::err_to_str(const int &code) {
     case -22:
       msg.append("Invalid argument");
       break;
+    case -19:
+      msg.append("No such device");
+      break;
     default:
       msg.append("Unspecified failure");
       break;

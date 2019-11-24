@@ -15,13 +15,13 @@ class Property {
   friend class Entity;
 
  private:
-  Attribute owner_identifier_;
   Attribute attr_;
+  const Attribute *owner_identifier_;
   const Nl80211Commands cmd_get_;
   const Nl80211Commands cmd_set_;
 
  public:
-  explicit Property(const Attribute &owner_id,
+  explicit Property(const Attribute *owner_id,
                     const Nl80211AttributeTypes &type,
                     const Attribute::ValueTypes &value_type,
                     const Nl80211Commands &cmd_get,
