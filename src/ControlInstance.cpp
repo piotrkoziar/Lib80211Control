@@ -2,6 +2,7 @@
 #include <iostream>
 #include <memory>
 #include <variant>
+#include "ComControl.h"
 #include "Communicator.h"
 #include "Wiphy.h"
 
@@ -29,21 +30,21 @@ class ControlInstance {
   void Main() {
     try {
       // Test
-      Socket *sock = new Socket(CALLBACK_DEBUG);
-      auto com = std::make_shared<Communicator>(CALLBACK_DEBUG);
-      Wiphy *wiphy = new Wiphy(0);
+      auto wiphy = std::make_shared<Wiphy>(0);
 
-      print_wiphy(*wiphy);
-
+      print_wiphy(*wiphy.get());
+      wiphy->name_.get();
+      print_wiphy(*wiphy.get());
+      wiphy->name_.set("phy00");
       wiphy->name_.get();
       wiphy->index_.set_value(12);
+      print_wiphy(*wiphy.get());
+      wiphy->name_.set("phy0");
 
-      print_wiphy(*wiphy);
-
-      delete (sock);
-      delete (wiphy);
     } catch (std::exception &e) {
       std::cout << "Exception: " << e.what() << "\n";
+      std::cout << "Communicator error report: "
+                << ComControl::get_global_error_report() << '\n';
     }
   }
 };

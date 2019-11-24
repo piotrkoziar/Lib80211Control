@@ -17,18 +17,21 @@ class Property {
  private:
   Attribute owner_identifier_;
   Attribute attr_;
-  const Nl80211Commands cmd_;
+  const Nl80211Commands cmd_get_;
+  const Nl80211Commands cmd_set_;
 
  public:
   explicit Property(const Attribute &owner_id,
                     const Nl80211AttributeTypes &type,
-                    const Attribute::ValueTypes &val_type,
-                    const Nl80211Commands &cmd);
+                    const Attribute::ValueTypes &value_type,
+                    const Nl80211Commands &cmd_get,
+                    const Nl80211Commands &cmd_set);
 
   const T &get_value() const;
   void set_value(T val);
-  // In this case, query the kernel.
+  // In cases below, query the kernel.
   const T &get();
+  void set(const T &arg);
 };
 
 }  // namespace wiphynlcontrol

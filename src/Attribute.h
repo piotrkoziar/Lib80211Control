@@ -15,9 +15,9 @@ struct Attribute {
   enum class ValueTypes { UINT32, STRING };
   std::variant<std::string, uint32_t> value;
   const Nl80211AttributeTypes type;
-  const ValueTypes val_type;
-  Attribute(const std::variant<std::string, uint32_t> &value,
-            const Nl80211AttributeTypes &type, const ValueTypes &val_type);
+  const ValueTypes value_type;
+  Attribute(const std::variant<std::string, uint32_t> &val,
+            const Nl80211AttributeTypes &tp, const ValueTypes &val_type);
 };
 
 }  // namespace wiphynlcontrol
