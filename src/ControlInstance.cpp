@@ -5,6 +5,7 @@
 
 #include "ComControl.h"
 #include "Communicator.h"
+#include "Interface.h"
 #include "Wiphy.h"
 
 namespace wiphynlcontrol {
@@ -26,6 +27,12 @@ static void print_wiphy(const Wiphy &wiphy) {
   // print(*wiphy.frequency_, "frequency");
 }
 
+static void print_iface(const Interface &iface) {
+  print(iface.index_.get_value(), "index");
+  print(iface.addr_.get_value(), "mac addr");
+  print(iface.name_.get_value(), "name");
+}
+
 class ControlInstance {
  public:
   void Main() {
@@ -33,14 +40,23 @@ class ControlInstance {
       // Test
       auto wiphy = std::make_shared<Wiphy>(0);
 
-      print_wiphy(*wiphy.get());
-      wiphy->name_.get();
-      print_wiphy(*wiphy.get());
-      wiphy->name_.set("phy00");
-      wiphy->name_.get();
-      print_wiphy(*wiphy.get());
-      wiphy->index_.set_value(0);
-      wiphy->name_.set("phy0");
+      // print_wiphy(*wiphy.get());
+      // wiphy->name_.get();
+      // print_wiphy(*wiphy.get());
+      // wiphy->name_.set("myphy00");
+      // wiphy->name_.get();
+      // print_wiphy(*wiphy.get());
+      // wiphy->name_.set("phy0");
+      // wiphy->index_.set_value(0);
+      // wiphy->name_.set("phy0");
+      // wiphy->name_.get();
+      std::cout << "\n\n\n";
+      auto iface = std::make_shared<Interface>(3);
+      // iface->index_.set();
+      print_iface(*iface.get());
+      iface->index_.get();
+      iface->addr_.get();
+      print_iface(*iface.get());
 
     } catch (std::exception &e) {
       std::cout << "Exception: " << e.what() << "\n";

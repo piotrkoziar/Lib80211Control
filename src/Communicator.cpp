@@ -5,6 +5,7 @@
 #include <netlink/netlink.h>
 
 #include <memory>
+#include <iostream> //TEMPORARY
 
 #include "Exception.h"
 
@@ -12,6 +13,9 @@ typedef struct nlmsghdr LibnlMessageHeader;
 typedef struct nlmsgerr LibnlErrorMessageHeader;
 typedef struct genlmsghdr LibnlGeMessageHeader;
 typedef struct sockaddr_nl LibnlSocketAddress;
+typedef struct {
+  char data[6];
+} uint48;
 
 namespace wiphynlcontrol {
 
@@ -75,12 +79,7 @@ void Communicator::send_and_receive(LibnlSocket *socket, LibnlMessage *message,
   if (!socket || !message) {
     throw Exception("Communicator:send_and_receive:argument is NULL");
   }
-  // Send the message
-  if (nl_send_auto(socket, message) < 0) {
-    throw Exception(
-        "Communicator:send_and_receive:nl_send_auto: exited with negative \
-        error code");
-  }
+
   // Set up callbacks.
   int ret = 1;
   nl_cb_err(callback_, NL_CB_CUSTOM,
@@ -91,7 +90,13 @@ void Communicator::send_and_receive(LibnlSocket *socket, LibnlMessage *message,
   nl_cb_set(callback_, NL_CB_VALID, NL_CB_CUSTOM,
             reinterpret_cast<nl_recvmsg_msg_cb_t>(get_attributes),
             const_cast<void *>(static_cast<const void *>(attr_read)));
-
+            
+  // Send the message
+  if (nl_send_auto(socket, message) < 0) {
+    throw Exception(
+        "Communicator:send_and_receive:nl_send_auto: exited with negative \
+        error code");
+  }
   // Get the answer.
   nl_recvmsgs(socket, callback_);
 }
@@ -113,18 +118,33 @@ int Communicator::get_attributes(LibnlMessage *msg,
             genlmsg_attrlen(header, 0), NULL);
 
   void *attribute_value;
+
+  //TEMPORARY-BELOW
+  for (auto type = NL80211_ATTR_UNSPEC; type < NL80211_ATTR_MAX; type = static_cast<Nl80211AttributeTypes>(type+1)) {
+    attribute_value = nla_data(attributes[type]);
+    std::cout << int(type) << "\t" << attribute_value
+              << std::endl;
+  }
+  std::cout << static_cast<const char *>(nla_data(attributes[NL80211_ATTR_IFNAME])) << std::endl;
+  std::cout << *static_cast<uint32_t *>(nla_data(attributes[NL80211_ATTR_IFINDEX])) << std::endl;
+  //END-TEMPORARY
+
   for (auto &it : *attr_read) {
     if (attributes[it->type]) {
       attribute_value = nla_data(attributes[it->type]);
       switch (it->value_type) {
-        default:
         case Attribute::ValueTypes::UINT32:
           it->value = *static_cast<uint32_t *>(attribute_value);
+          break;
+
+        case Attribute::ValueTypes::UINT48:
+          it->value = static_cast<const char *>(attribute_value);
           break;
 
         case Attribute::ValueTypes::STRING:
           it->value = static_cast<const char *>(attribute_value);
           break;
+        default:;
       }
     }
   }

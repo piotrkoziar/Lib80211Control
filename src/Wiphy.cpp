@@ -11,7 +11,9 @@ Wiphy::Wiphy(const uint32_t &id)
       // Initialization of other Wiphy properties
       name_(&get_attributes(index_), NL80211_ATTR_WIPHY_NAME,
             Attribute::ValueTypes::STRING, NL80211_CMD_GET_WIPHY,
-            NL80211_CMD_SET_WIPHY) {}
+            NL80211_CMD_SET_WIPHY) {
+  set_identifier(id);
+}
 
 const uint32_t &Wiphy::get_identifier() const { return index_.get_value(); }
 

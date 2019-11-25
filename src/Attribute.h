@@ -12,7 +12,7 @@ typedef struct nlattr LibnlAttribute;
 namespace wiphynlcontrol {
 
 struct Attribute {
-  enum class ValueTypes { UINT32, STRING };
+  enum class ValueTypes { UINT32, UINT48, STRING };
   std::variant<std::string, uint32_t> value;
   const Nl80211AttributeTypes type;
   const ValueTypes value_type;
