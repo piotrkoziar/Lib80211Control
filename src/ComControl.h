@@ -1,9 +1,9 @@
 #ifndef WIPHYNLCONTROL_COMCONTROL_H_
 #define WIPHYNLCONTROL_COMCONTROL_H_
 
-#include "Communicator.h"
-
 #include <memory>
+
+#include "Communicator.h"
 
 namespace wiphynlcontrol {
 

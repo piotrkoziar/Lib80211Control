@@ -11,10 +11,10 @@ namespace wiphynlcontrol {
 class Message {
  public:
   enum class Flags {
-    NONE  = 0,
-    ROOT  = NLM_F_ROOT,
+    NONE = 0,
+    ROOT = NLM_F_ROOT,
     MATCH = NLM_F_MATCH,
-    DUMP  = NLM_F_DUMP
+    DUMP = NLM_F_DUMP
   };
 
  private:

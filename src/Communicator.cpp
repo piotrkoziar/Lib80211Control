@@ -5,6 +5,7 @@
 #include <netlink/netlink.h>
 
 #include <memory>
+
 #include "Exception.h"
 
 typedef struct nlmsghdr LibnlMessageHeader;
