@@ -2,6 +2,7 @@
 #include <iostream>
 #include <memory>
 #include <variant>
+
 #include "ComControl.h"
 #include "Communicator.h"
 #include "Wiphy.h"
