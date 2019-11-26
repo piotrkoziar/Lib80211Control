@@ -5,6 +5,7 @@
 #include <netlink/netlink.h>
 
 #include <memory>
+
 #include "Exception.h"
 
 typedef struct nlmsghdr LibnlMessageHeader;
@@ -134,7 +135,7 @@ void Communicator::challenge(const Nl80211Commands &command,
                              const Message::Flags &flags,
                              const std::vector<const Attribute *> *attr_arg,
                              const std::vector<Attribute *> *attr_read) {
-  auto socket = std::make_unique<Socket>(socket_cb_kind_);
+  auto socket  = std::make_unique<Socket>(socket_cb_kind_);
   auto message = std::make_unique<Message>(flags);
 
   // Add Netlink header, Generic Netlink header to the message.

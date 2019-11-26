@@ -3,6 +3,7 @@
 #define WIPHYNLCONTROL_COMMUNICATOR_H_
 
 #include <vector>
+
 #include "Message.h"
 #include "Property.h"
 #include "Socket.h"

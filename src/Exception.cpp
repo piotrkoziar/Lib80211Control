@@ -12,7 +12,7 @@ const char *Exception::what() const noexcept { return info_.c_str(); }
 
 const std::string Exception::err_to_str(const int &code) {
   std::string str_code = std::to_string(code);
-  std::string msg = ": ";
+  std::string msg      = ": ";
   switch (code) {
     case -1:
       msg.append("Operation not permitted");

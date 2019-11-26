@@ -6,6 +6,7 @@
 
 #include <cassert>
 #include <iostream>
+
 #include "Exception.h"
 
 namespace wiphynlcontrol {
@@ -40,7 +41,7 @@ Socket::Socket(const CallbackKind cb_kind) {
 }
 
 void Socket::set_callback(const LibnlCallback *cb) {
-  if(!cb) {
+  if (!cb) {
     throw Exception("Socket:set_callback:argument is null");
   }
   callback_ = const_cast<LibnlCallback *>(cb);

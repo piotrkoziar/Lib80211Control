@@ -46,3 +46,6 @@ $(OBJECTS1):$(OBJDIR)/%.o: $(SRCDIR)/%.cpp $(INCLUDES1)
 
 clean:
 	rm -f $(OBJDIR)/*.o $(BINDIR)/$(TARGET1)
+
+format:
+	clang-format -i src/*.cpp src/*.h
