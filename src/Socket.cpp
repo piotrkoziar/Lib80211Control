@@ -16,20 +16,20 @@ Socket::Socket(const CallbackKind cb_kind) {
     throw Exception("Socket:Socket:socket allocation failed");
   }
 
+  if (genl_connect(socket_) < 0) {
+    throw Exception("Socket:Socket:genl_connect:exited with non-zero code");
+  }
+
   try {
     // Set socket fd option NETLINK_EXT_ACK
     int option_value = 1;
     if (setsockopt(nl_socket_get_fd(socket_), SOL_NETLINK, NETLINK_EXT_ACK,
                    &option_value, sizeof(option_value)) < 0) {
-      throw Exception("Socket:Socket:setsockopt:setting socket option failed");
+      throw Exception(append_errno_to_str("Socket:Socket:setsockopt:setting socket option failed : ", errno));
     }
   } catch (const std::exception &e) {
     // TODO do not put to stderror
     std::cerr << e.what() << '\n';
-  }
-
-  if (genl_connect(socket_) < 0) {
-    throw Exception("Socket:Socket:genl_connect:exited with non-zero code");
   }
 
   callback_ = nl_cb_alloc(static_cast<LibnlCallbackKind>(cb_kind));

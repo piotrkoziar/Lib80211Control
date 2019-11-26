@@ -2,6 +2,10 @@
 
 namespace wiphynlcontrol {
 
+std::string append_errno_to_str(const std::string &info, const int &errno_val) {
+  return info + std::strerror(errno_val);
+}
+
 Exception::Exception(const std::string &info) : info_(info) {}
 
 const char *Exception::what() const noexcept { return info_.c_str(); }
