@@ -48,4 +48,4 @@ clean:
 	rm -f $(OBJDIR)/*.o $(BINDIR)/$(TARGET1)
 
 format:
-	clang-format -style=google -i src/*.cpp src/*.h
+	clang-format -i src/*.cpp src/*.h
