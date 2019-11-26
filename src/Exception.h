@@ -9,7 +9,7 @@
 
 namespace wiphynlcontrol {
 
-std::string append_errno_to_str(const std::string &info, const int &errno_code);
+std::string append_errno_to_str(const std::string &info);
 
 class Exception : public std::exception {
  private:
