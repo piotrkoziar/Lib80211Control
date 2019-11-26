@@ -1,7 +1,6 @@
 #include "Property.h"
 
 #include <string>
-
 #include "ComControl.h"
 #include "Exception.h"
 #include "Message.h"

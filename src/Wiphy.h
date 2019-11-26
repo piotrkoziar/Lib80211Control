@@ -2,7 +2,6 @@
 #define WIPHYNLCONTROL_WIPHY_H_
 
 #include <string>
-
 #include "Entity.h"
 #include "Property.h"
 

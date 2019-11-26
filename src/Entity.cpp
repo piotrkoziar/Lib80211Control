@@ -1,5 +1,4 @@
 #include "Entity.h"
-
 #include "Property.h"
 
 namespace wiphynlcontrol {
