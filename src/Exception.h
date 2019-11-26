@@ -3,8 +3,13 @@
 
 #include <exception>
 #include <string>
+#include <cerrno>
+#include <cstring>
+
 
 namespace wiphynlcontrol {
+
+std::string append_errno_to_str(const std::string &info);
 
 class Exception : public std::exception {
  private:
