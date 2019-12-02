@@ -31,9 +31,11 @@ void Property<T>::set_value(T val) {
 
 template <typename T>
 const T &Property<T>::get() {
+  auto tmp_attr =
+      Attribute(0, NL80211_ATTR_WIPHY, Attribute::ValueTypes::UINT32);
   const auto attr_args = std::vector<const Attribute *>{owner_identifier_};
   const auto attr_read = std::vector<Attribute *>{&attr_};
-  ComControl::get_communicator().challenge(cmd_get_, Message::Flags::MATCH,
+  ComControl::get_communicator().challenge(cmd_get_, Message::Flags::DUMP,
                                            &attr_args, &attr_read);
   return std::get<T>(attr_.value);
 }

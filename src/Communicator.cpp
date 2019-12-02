@@ -4,8 +4,8 @@
 #include <netlink/genl/genl.h>
 #include <netlink/netlink.h>
 
+#include <iostream>
 #include <memory>
-#include <iostream> //TEMPORARY
 
 #include "Exception.h"
 
@@ -13,9 +13,6 @@ typedef struct nlmsghdr LibnlMessageHeader;
 typedef struct nlmsgerr LibnlErrorMessageHeader;
 typedef struct genlmsghdr LibnlGeMessageHeader;
 typedef struct sockaddr_nl LibnlSocketAddress;
-typedef struct {
-  char data[6];
-} uint48;
 
 namespace wiphynlcontrol {
 
@@ -90,7 +87,7 @@ void Communicator::send_and_receive(LibnlSocket *socket, LibnlMessage *message,
   nl_cb_set(callback_, NL_CB_VALID, NL_CB_CUSTOM,
             reinterpret_cast<nl_recvmsg_msg_cb_t>(get_attributes),
             const_cast<void *>(static_cast<const void *>(attr_read)));
-            
+
   // Send the message
   if (nl_send_auto(socket, message) < 0) {
     throw Exception(
@@ -119,15 +116,16 @@ int Communicator::get_attributes(LibnlMessage *msg,
 
   void *attribute_value;
 
-  //TEMPORARY-BELOW
-  for (auto type = NL80211_ATTR_UNSPEC; type < NL80211_ATTR_MAX; type = static_cast<Nl80211AttributeTypes>(type+1)) {
+#ifdef COM_DEBUG
+  std::cout << "Received ATTRs:\n";
+  for (auto type = NL80211_ATTR_UNSPEC; type < NL80211_ATTR_MAX;
+       type      = static_cast<Nl80211AttributeTypes>(type + 1)) {
     attribute_value = nla_data(attributes[type]);
-    std::cout << int(type) << "\t" << attribute_value
-              << std::endl;
+    if (reinterpret_cast<long>(attribute_value) != 0x4) {
+      std::cout << int(type) << "\t" << attribute_value << std::endl;
+    }
   }
-  std::cout << static_cast<const char *>(nla_data(attributes[NL80211_ATTR_IFNAME])) << std::endl;
-  std::cout << *static_cast<uint32_t *>(nla_data(attributes[NL80211_ATTR_IFINDEX])) << std::endl;
-  //END-TEMPORARY
+#endif
 
   for (auto &it : *attr_read) {
     if (attributes[it->type]) {
