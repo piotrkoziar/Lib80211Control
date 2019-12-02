@@ -14,9 +14,11 @@ class Interface : public Entity {
 
  public:
   Property<uint32_t> index_;
-  Property<std::string> addr_;
   Property<std::string> name_;
-  // Property<std::string> ssid_;
+  Property<uint32_t> type_;
+  Property<std::string> mac_addr_;
+
+  Property<std::string> ssid_;
   // Property<uint8_t> type_;
 
  public:
