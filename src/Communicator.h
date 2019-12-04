@@ -7,8 +7,19 @@
 #include "Message.h"
 #include "Property.h"
 #include "Socket.h"
+#include "Wiphy.h"
 
 namespace wiphynlcontrol {
+
+struct arg_get_attr_filtered {
+  const std::vector<const Attribute *> *filters;
+  const std::vector<Attribute *> *ret_attrs;
+};
+
+struct arg_get_wiphy_filtered {
+  std::vector<const Attribute *> filters;
+  std::vector<Wiphy *> ret_wiphys;
+};
 
 class Communicator {
  private:
@@ -29,10 +40,10 @@ class Communicator {
   void set_family_id(LibnlSocket *socket);
   // Sends the message_ and gets the answer.
   void send_and_receive(LibnlSocket *socket, LibnlMessage *message,
-                        const std::vector<Attribute *> *attr_read);
+                        const arg_get_attr_filtered *get_ret);
   // Gets attributes from the message. Use as callback.
   static int get_attributes(LibnlMessage *msg,
-                            const std::vector<Attribute *> *attr_read);
+                            const arg_get_attr_filtered *get_ret);
 
  public:
   // Prepares message and socket. Uses given command and
@@ -40,6 +51,10 @@ class Communicator {
   // @param attr_arg - attribute attached to the request. Usually the
   // identifier.
   // @param attr_read - attributes expected to be present in kernel's response.
+
+  /*void challenge(const Nl80211Commands &command, const Message::Flags &flags,
+                 const std::vector<const Attribute *> *attr_arg,
+                 const std::vector<Attribute *> *attr_read); */
   void challenge(const Nl80211Commands &command, const Message::Flags &flags,
                  const std::vector<const Attribute *> *attr_arg,
                  const std::vector<Attribute *> *attr_read);

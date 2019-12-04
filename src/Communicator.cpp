@@ -72,7 +72,7 @@ void Communicator::set_family_id(LibnlSocket *socket) {
 }
 
 void Communicator::send_and_receive(LibnlSocket *socket, LibnlMessage *message,
-                                    const std::vector<Attribute *> *attr_read) {
+                                    const arg_get_attr_filtered *get_ret) {
   if (!socket || !message) {
     throw Exception("Communicator:send_and_receive:argument is NULL");
   }
@@ -86,7 +86,7 @@ void Communicator::send_and_receive(LibnlSocket *socket, LibnlMessage *message,
   nl_cb_set(callback_, NL_CB_ACK, NL_CB_CUSTOM, ack_handler, &ret);
   nl_cb_set(callback_, NL_CB_VALID, NL_CB_CUSTOM,
             reinterpret_cast<nl_recvmsg_msg_cb_t>(get_attributes),
-            const_cast<void *>(static_cast<const void *>(attr_read)));
+            const_cast<void *>(static_cast<const void *>(get_ret)));
 
   // Send the message
   if (nl_send_auto(socket, message) < 0) {
@@ -99,8 +99,8 @@ void Communicator::send_and_receive(LibnlSocket *socket, LibnlMessage *message,
 }
 
 int Communicator::get_attributes(LibnlMessage *msg,
-                                 const std::vector<Attribute *> *attr_read) {
-  if (!attr_read) {
+                                 const arg_get_attr_filtered *get_ret) {
+  if (!get_ret->ret_attrs) {
     return NL_OK;  // No attributes was specified to read from message.
   }
   // Get message header
@@ -127,7 +127,7 @@ int Communicator::get_attributes(LibnlMessage *msg,
   }
 #endif
 
-  for (auto &it : *attr_read) {
+  for (auto &it : *get_ret->ret_attrs) {
     if (attributes[it->type]) {
       attribute_value = nla_data(attributes[it->type]);
       switch (it->value_type) {
@@ -155,6 +155,9 @@ void Communicator::challenge(const Nl80211Commands &command,
                              const std::vector<Attribute *> *attr_read) {
   auto socket  = std::make_unique<Socket>(socket_cb_kind_);
   auto message = std::make_unique<Message>(flags);
+  struct arg_get_attr_filtered get_ret {
+    attr_arg, attr_read
+  };
 
   // Add Netlink header, Generic Netlink header to the message.
   if (!genlmsg_put(message->get_message(),   // message
@@ -171,7 +174,7 @@ void Communicator::challenge(const Nl80211Commands &command,
 
   add_attributes(message->get_message(), attr_arg);
 
-  send_and_receive(socket->get_socket(), message->get_message(), attr_read);
+  send_and_receive(socket->get_socket(), message->get_message(), &get_ret);
 }
 
 void Communicator::set_callback_kind(const CallbackKind &kind) {
