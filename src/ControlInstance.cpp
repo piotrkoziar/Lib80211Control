@@ -49,10 +49,9 @@ class ControlInstance {
     try {
       // Test
       auto wiphy = std::make_shared<Wiphy>(0);
-
-      // print_wiphy(*wiphy.get());
-      // wiphy->name_.get();
-      // print_wiphy(*wiphy.get());
+      print_wiphy(*wiphy.get());
+      wiphy->name_.get();
+      print_wiphy(*wiphy.get());
       // wiphy->name_.set("myphy00");
       // wiphy->name_.get();
       // print_wiphy(*wiphy.get());
@@ -67,13 +66,23 @@ class ControlInstance {
       // print_iface(*iface.get());
       // iface->index_.get();
       iface->mac_addr_.get();
+      std::cout << "got mac\n";
+      print_iface(*iface.get());
+
       iface->name_.get();
+      std::cout << "got name\n";
+      print_iface(*iface.get());
+
       iface->ssid_.get();
+      std::cout << "got ssid\n";
+      print_iface(*iface.get());
+
       iface->type_.get();
+      std::cout << "got type\n";
+      print_iface(*iface.get());
       // iface2->addr_.get();
       // iface2->name_.get();
       // iface->addr_.get();
-      print_iface(*iface.get());
       // print_iface(*iface2.get());
 
     } catch (std::exception &e) {

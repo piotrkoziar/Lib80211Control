@@ -17,9 +17,7 @@ class Interface : public Entity {
   Property<std::string> name_;
   Property<uint32_t> type_;
   Property<std::string> mac_addr_;
-
   Property<std::string> ssid_;
-  // Property<uint8_t> type_;
 
  public:
   // Returns identifier. Overloads abstract method from Entity.
