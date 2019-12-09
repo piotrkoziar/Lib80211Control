@@ -20,6 +20,7 @@ class Entity {
   // This member identifies the Entity.
   virtual uint32_t get_identifier() const  = 0;
   virtual void set_identifier(const uint32_t &id) = 0;
+  virtual void get()                              = 0;
 };
 
 }  // namespace wiphynlcontrol

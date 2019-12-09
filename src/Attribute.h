@@ -18,7 +18,7 @@ typedef struct SSIDInfo {
 } SSIDInfo;
 
 struct Attribute {
-  enum class ValueTypes { UINT32, UINT48, STRING, NESTED, SCAN };
+  enum class ValueTypes { UINT8, UINT16, UINT32, UINT48, STRING, NESTED, SCAN };
   void  *value;
   const Nl80211AttributeTypes type;
   const ValueTypes value_type;

@@ -5,6 +5,7 @@
 
 #include "ComControl.h"
 #include "Interface.h"
+#include "Station.h"
 #include "Wiphy.h"
 
 namespace wiphynlcontrol {
@@ -28,6 +29,12 @@ static void print_iface(const Interface &iface) {
   print(iface.type_.value_, "interface type");
   print(iface.mac_addr_.value_, "mac addr");
   print(iface.ssid_.value_, "SSID");
+}
+
+static void print_stat(const Station &stat) {
+  print(stat.dev_index_.value_, "dev_index");
+  print(stat.mac_addr_.value_, "mac addr");
+  print(stat.generation_.value_, "generation");
 }
 
 class ControlInstance {

@@ -10,11 +10,7 @@ namespace wiphynlcontrol {
 
 class Message {
  public:
-  enum class Flags {
-    NONE  = 0,
-    ROOT  = NLM_F_ROOT,
-    DUMP  = NLM_F_DUMP
-  };
+  enum class Flags { NONE = 0, ROOT = NLM_F_ROOT, DUMP = NLM_F_DUMP };
 
  private:
   LibnlMessage *message_;

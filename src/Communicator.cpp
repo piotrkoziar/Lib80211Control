@@ -162,7 +162,7 @@ int Communicator::get_attributes(LibnlMessage *msg,
   for (auto type = NL80211_ATTR_UNSPEC; type < NL80211_ATTR_MAX;
        type      = static_cast<Nl80211AttributeTypes>(type + 1)) {
     attribute_to_read_value = nla_data(attributes.get()[type]);
-    if (reinterpret_cast<long>(attribute_to_read_value) != 0x4) {
+    if (reinterpret_cast<long>(attribute_to_read_value) != NLA_HDRLEN) {
       std::cout << int(type) << "\t" << attribute_to_read_value << std::endl;
     }
   }
@@ -171,6 +171,13 @@ int Communicator::get_attributes(LibnlMessage *msg,
   if (!attr_read) {
     return NL_OK;  // No attributes was specified to read from message.
   }
+#ifdef COM_DEBUG
+  std::cout << "Requested ATTRs: " << attr_read->size() << std::endl;
+  for (auto &it : *attr_read) {
+    std::cout << static_cast<int>(it->type) << std::endl;
+  }
+#endif
+
   // Get message header
   LibnlGeMessageHeader *header;
   if (!(header =
