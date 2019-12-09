@@ -4,6 +4,7 @@
 #include <netlink/genl/genl.h>
 #include <netlink/netlink.h>
 
+#include <iostream>
 #include <memory>
 
 #include "Exception.h"
@@ -75,12 +76,7 @@ void Communicator::send_and_receive(LibnlSocket *socket, LibnlMessage *message,
   if (!socket || !message) {
     throw Exception("Communicator:send_and_receive:argument is NULL");
   }
-  // Send the message
-  if (nl_send_auto(socket, message) < 0) {
-    throw Exception(
-        "Communicator:send_and_receive:nl_send_auto: exited with negative \
-        error code");
-  }
+
   // Set up callbacks.
   int ret = 1;
   nl_cb_err(callback_, NL_CB_CUSTOM,
@@ -92,6 +88,12 @@ void Communicator::send_and_receive(LibnlSocket *socket, LibnlMessage *message,
             reinterpret_cast<nl_recvmsg_msg_cb_t>(get_attributes),
             const_cast<void *>(static_cast<const void *>(attr_read)));
 
+  // Send the message
+  if (nl_send_auto(socket, message) < 0) {
+    throw Exception(
+        "Communicator:send_and_receive:nl_send_auto: exited with negative \
+        error code");
+  }
   // Get the answer.
   nl_recvmsgs(socket, callback_);
 }
@@ -113,18 +115,42 @@ int Communicator::get_attributes(LibnlMessage *msg,
             genlmsg_attrlen(header, 0), NULL);
 
   void *attribute_value;
+
+#ifdef COM_DEBUG
+  std::cout << "Received ATTRs:\n";
+  for (auto type = NL80211_ATTR_UNSPEC; type < NL80211_ATTR_MAX;
+       type      = static_cast<Nl80211AttributeTypes>(type + 1)) {
+    attribute_value = nla_data(attributes[type]);
+    if (reinterpret_cast<long>(attribute_value) != 0x4) {
+      std::cout << int(type) << "\t" << attribute_value << std::endl;
+    }
+  }
+#endif
+
   for (auto &it : *attr_read) {
     if (attributes[it->type]) {
       attribute_value = nla_data(attributes[it->type]);
       switch (it->value_type) {
-        default:
         case Attribute::ValueTypes::UINT32:
           it->value = *static_cast<uint32_t *>(attribute_value);
+          break;
+
+        case Attribute::ValueTypes::UINT48:
+          char tmp_str[17];
+          sprintf(tmp_str, "%02x:%02x:%02x:%02x:%02x:%02x",
+            *(static_cast<const char *>(attribute_value)) & 0xff,
+            *(static_cast<const char *>(attribute_value)+1) & 0xff,
+            *(static_cast<const char *>(attribute_value)+2) & 0xff,
+            *(static_cast<const char *>(attribute_value)+3) & 0xff,
+            *(static_cast<const char *>(attribute_value)+4) & 0xff,
+            *(static_cast<const char *>(attribute_value)+5) & 0xff);
+            it->value = tmp_str;
           break;
 
         case Attribute::ValueTypes::STRING:
           it->value = static_cast<const char *>(attribute_value);
           break;
+        default:;
       }
     }
   }
