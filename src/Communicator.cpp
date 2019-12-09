@@ -136,7 +136,15 @@ int Communicator::get_attributes(LibnlMessage *msg,
           break;
 
         case Attribute::ValueTypes::UINT48:
-          it->value = static_cast<const char *>(attribute_value);
+          char tmp_str[17];
+          sprintf(tmp_str, "%02x:%02x:%02x:%02x:%02x:%02x",
+            *(static_cast<const char *>(attribute_value)) & 0xff,
+            *(static_cast<const char *>(attribute_value)+1) & 0xff,
+            *(static_cast<const char *>(attribute_value)+2) & 0xff,
+            *(static_cast<const char *>(attribute_value)+3) & 0xff,
+            *(static_cast<const char *>(attribute_value)+4) & 0xff,
+            *(static_cast<const char *>(attribute_value)+5) & 0xff);
+            it->value = tmp_str;
           break;
 
         case Attribute::ValueTypes::STRING:

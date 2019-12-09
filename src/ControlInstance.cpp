@@ -31,15 +31,7 @@ static void print_iface(const Interface &iface) {
   print(iface.index_.get_value(), "index");
   print(iface.name_.get_value(), "name");
   print(iface.type_.get_value(), "interface type");
-
-  printf("%s: %02x:%02x:%02x:%02x:%02x:%02x\n", "mac addr",
-         iface.mac_addr_.get_value().c_str()[0] & 0xff,
-         iface.mac_addr_.get_value().c_str()[1] & 0xff,
-         iface.mac_addr_.get_value().c_str()[2] & 0xff,
-         iface.mac_addr_.get_value().c_str()[3] & 0xff,
-         iface.mac_addr_.get_value().c_str()[4] & 0xff,
-         iface.mac_addr_.get_value().c_str()[5] & 0xff);
-
+  print(iface.mac_addr_.get_value(), "mac addr");
   print(iface.ssid_.get_value(), "SSID");
 }
 
@@ -60,7 +52,7 @@ class ControlInstance {
       // wiphy->name_.set("phy0");
       // wiphy->name_.get();
       std::cout << "\n\n\n";
-      auto iface = std::make_shared<Interface>(4);
+      auto iface = std::make_shared<Interface>(3);
       // auto iface2 = std::make_shared<Interface>(4);
       // iface->index_.set();
       // print_iface(*iface.get());
