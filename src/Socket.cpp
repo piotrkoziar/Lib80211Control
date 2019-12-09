@@ -24,8 +24,11 @@ Socket::Socket(const CallbackKind cb_kind) {
   try {
     // Set socket fd option NETLINK_EXT_ACK
     int option_value = 1;
-    if (setsockopt(nl_socket_get_fd(socket_), SOL_NETLINK, NETLINK_EXT_ACK,
-                   &option_value, sizeof(option_value)) < 0) {
+    if (setsockopt(nl_socket_get_fd(socket_),
+                   SOL_NETLINK,
+                   NETLINK_EXT_ACK,
+                   &option_value,
+                   sizeof(option_value)) < 0) {
       throw Exception(append_errno_to_str(
           "Socket:Socket:setsockopt:setting socket option failed : "));
     }

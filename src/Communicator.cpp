@@ -18,7 +18,8 @@ namespace wiphynlcontrol {
 
 // Gets the error attribute from the message.
 // Assigns charater string to the arg parameter.
-static int error_handler(LibnlSocketAddress *nla, LibnlErrorMessageHeader *err,
+static int error_handler(LibnlSocketAddress *nla,
+                         LibnlErrorMessageHeader *err,
                          std::string *arg);
 static int ack_handler(LibnlMessage *msg, void *arg);
 static int finish_handler(LibnlMessage *msg, void *arg);
@@ -49,8 +50,8 @@ void Communicator::add_attributes(
         break;
       }
       case Attribute::ValueTypes::STRING: {
-        NLA_PUT_STRING(message, it->type,
-                       std::get<std::string>(it->value).c_str());
+        NLA_PUT_STRING(
+            message, it->type, std::get<std::string>(it->value).c_str());
         break;
       }
       default: {
@@ -71,7 +72,8 @@ void Communicator::set_family_id(LibnlSocket *socket) {
   }
 }
 
-void Communicator::send_and_receive(LibnlSocket *socket, LibnlMessage *message,
+void Communicator::send_and_receive(LibnlSocket *socket,
+                                    LibnlMessage *message,
                                     const std::vector<Attribute *> *attr_read) {
   if (!socket || !message) {
     throw Exception("Communicator:send_and_receive:argument is NULL");
@@ -79,12 +81,15 @@ void Communicator::send_and_receive(LibnlSocket *socket, LibnlMessage *message,
 
   // Set up callbacks.
   int ret = 1;
-  nl_cb_err(callback_, NL_CB_CUSTOM,
+  nl_cb_err(callback_,
+            NL_CB_CUSTOM,
             reinterpret_cast<nl_recvmsg_err_cb_t>(error_handler),
             static_cast<void *>(&error_report_));
   nl_cb_set(callback_, NL_CB_FINISH, NL_CB_CUSTOM, finish_handler, &ret);
   nl_cb_set(callback_, NL_CB_ACK, NL_CB_CUSTOM, ack_handler, &ret);
-  nl_cb_set(callback_, NL_CB_VALID, NL_CB_CUSTOM,
+  nl_cb_set(callback_,
+            NL_CB_VALID,
+            NL_CB_CUSTOM,
             reinterpret_cast<nl_recvmsg_msg_cb_t>(get_attributes),
             const_cast<void *>(static_cast<const void *>(attr_read)));
 
@@ -111,8 +116,11 @@ int Communicator::get_attributes(LibnlMessage *msg,
   }
   // Get message attributes
   LibnlAttribute *attributes[NL80211_ATTR_MAX + 1];
-  nla_parse(attributes, NL80211_ATTR_MAX, genlmsg_attrdata(header, 0),
-            genlmsg_attrlen(header, 0), NULL);
+  nla_parse(attributes,
+            NL80211_ATTR_MAX,
+            genlmsg_attrdata(header, 0),
+            genlmsg_attrlen(header, 0),
+            NULL);
 
   void *attribute_value;
 
@@ -136,15 +144,16 @@ int Communicator::get_attributes(LibnlMessage *msg,
           break;
 
         case Attribute::ValueTypes::UINT48:
-          char tmp_str[17];
-          sprintf(tmp_str, "%02x:%02x:%02x:%02x:%02x:%02x",
-            *(static_cast<const char *>(attribute_value)) & 0xff,
-            *(static_cast<const char *>(attribute_value)+1) & 0xff,
-            *(static_cast<const char *>(attribute_value)+2) & 0xff,
-            *(static_cast<const char *>(attribute_value)+3) & 0xff,
-            *(static_cast<const char *>(attribute_value)+4) & 0xff,
-            *(static_cast<const char *>(attribute_value)+5) & 0xff);
-            it->value = tmp_str;
+          char tmp_str[18];
+          sprintf(tmp_str,
+                  "%02x:%02x:%02x:%02x:%02x:%02x",
+                  *(static_cast<const char *>(attribute_value)) & 0xff,
+                  *(static_cast<const char *>(attribute_value) + 1) & 0xff,
+                  *(static_cast<const char *>(attribute_value) + 2) & 0xff,
+                  *(static_cast<const char *>(attribute_value) + 3) & 0xff,
+                  *(static_cast<const char *>(attribute_value) + 4) & 0xff,
+                  *(static_cast<const char *>(attribute_value) + 5) & 0xff);
+          it->value = tmp_str;
           break;
 
         case Attribute::ValueTypes::STRING:
@@ -194,7 +203,8 @@ Communicator::~Communicator() { nl_cb_put(callback_); }
 
 // Message handlers.
 
-int error_handler(LibnlSocketAddress *nla, LibnlErrorMessageHeader *err_msg,
+int error_handler(LibnlSocketAddress *nla,
+                  LibnlErrorMessageHeader *err_msg,
                   std::string *arg) {
   /* Example:
 
@@ -252,8 +262,11 @@ int error_handler(LibnlSocketAddress *nla, LibnlErrorMessageHeader *err_msg,
       reinterpret_cast<unsigned char *>(header) + ack_length);
   // The error attributes addressess are stored in the table.
   LibnlAttribute *err_attributes[NLMSGERR_ATTR_MAX + 1];
-  nla_parse(err_attributes, NLMSGERR_ATTR_MAX, attributes,
-            (header->nlmsg_len - ack_length), NULL);
+  nla_parse(err_attributes,
+            NLMSGERR_ATTR_MAX,
+            attributes,
+            (header->nlmsg_len - ack_length),
+            NULL);
   // Try to get specific error attribute.
   if (err_attributes[NLMSGERR_ATTR_MSG]) {
     arg->append(
