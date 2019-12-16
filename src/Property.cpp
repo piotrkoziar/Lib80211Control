@@ -33,8 +33,8 @@ template <typename T>
 const T &Property<T>::get() {
   const auto attr_args = std::vector<const Attribute *>{owner_identifier_};
   const auto attr_read = std::vector<Attribute *>{&attr_};
-  ComControl::get_communicator().challenge(cmd_get_, Message::Flags::NONE,
-                                           &attr_args, &attr_read);
+  ComControl::get_communicator().challenge(
+      cmd_get_, Message::Flags::NONE, &attr_args, &attr_read);
   return std::get<T>(attr_.value);
 }
 
@@ -45,8 +45,8 @@ void Property<T>::set(const T &arg) {
   // Place the object in the vactor and add to the request for the Communicator.
   const auto attr_args =
       std::vector<const Attribute *>{owner_identifier_, &attr_arg};
-  ComControl::get_communicator().challenge(cmd_set_, Message::Flags::NONE,
-                                           &attr_args, NULL);
+  ComControl::get_communicator().challenge(
+      cmd_set_, Message::Flags::NONE, &attr_args, NULL);
   // Check if error callback reported error.
   if (ComControl::get_global_error_report() != "") {
     throw Exception("Property:set:error report after challenge call");

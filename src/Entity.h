@@ -14,7 +14,7 @@ class Entity {
   // This function can be called by any derived class to access private
   // Property class member. Entity is a friend to the Property class.
   template <typename T>
-  const Attribute &get_attributes(const Property<T> &prop) const;
+  Attribute &get_attribute(Property<T> &prop) const;
 
  public:
   // This member identifies the Entity.

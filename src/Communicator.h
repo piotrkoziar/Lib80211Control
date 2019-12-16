@@ -28,7 +28,8 @@ class Communicator {
   // Generic Netlink family name. Sets nl80211_family_id_ with the result.
   void set_family_id(LibnlSocket *socket);
   // Sends the message_ and gets the answer.
-  void send_and_receive(LibnlSocket *socket, LibnlMessage *message,
+  void send_and_receive(LibnlSocket *socket,
+                        LibnlMessage *message,
                         const std::vector<Attribute *> *attr_read);
   // Gets attributes from the message. Use as callback.
   static int get_attributes(LibnlMessage *msg,
@@ -40,7 +41,8 @@ class Communicator {
   // @param attr_arg - attribute attached to the request. Usually the
   // identifier.
   // @param attr_read - attributes expected to be present in kernel's response.
-  void challenge(const Nl80211Commands &command, const Message::Flags &flags,
+  void challenge(const Nl80211Commands &command,
+                 const Message::Flags &flags,
                  const std::vector<const Attribute *> *attr_arg,
                  const std::vector<Attribute *> *attr_read);
   void set_callback_kind(const CallbackKind &kind);

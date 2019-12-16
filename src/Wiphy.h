@@ -1,6 +1,9 @@
 #ifndef WIPHYNLCONTROL_WIPHY_H_
 #define WIPHYNLCONTROL_WIPHY_H_
 
+#define WIPHY_ATTR_NUM 2
+
+#include <array>
 #include <string>
 
 #include "Entity.h"
@@ -16,7 +19,11 @@ class Wiphy : public Entity {
   Property<uint32_t> index_;
   Property<std::string> name_;
 
+ private:
+  const std::array<struct Attribute *, WIPHY_ATTR_NUM> all_attrs;
+
  public:
+  void get();
   // Returns identifier. Overloads abstract method from Entity.
   const uint32_t &get_identifier() const;
   // Overloads abstract method from Entity.
