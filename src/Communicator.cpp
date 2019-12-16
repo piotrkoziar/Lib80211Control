@@ -171,7 +171,7 @@ void Communicator::challenge(const Nl80211Commands &command,
                              const std::vector<const Attribute *> *attr_arg,
                              const std::vector<Attribute *> *attr_read) {
   auto socket  = std::make_unique<Socket>(socket_cb_kind_);
-  auto message = std::make_unique<Message>(flags);
+  auto message = std::make_unique<Message>();
 
   // Add Netlink header, Generic Netlink header to the message.
   if (!genlmsg_put(message->get_message(),   // message
