@@ -19,15 +19,12 @@ class Message {
 
  private:
   LibnlMessage *message_;
-  Flags flags_;
 
  public:
-  explicit Message(const Flags &flags);
+  explicit Message();
 
  public:
   LibnlMessage *get_message() const;
-  const Flags &get_flags() const;
-  void set_flags(const Flags &flags);
 
  public:
   ~Message();
