@@ -27,6 +27,8 @@ class Property {
                     const Nl80211Commands &cmd_get,
                     const Nl80211Commands &cmd_set);
 
+  Attribute &get_attribute();
+
   const T &get_value() const;
   void set_value(T val);
   // In cases below, query the kernel.

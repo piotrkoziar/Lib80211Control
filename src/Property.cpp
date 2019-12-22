@@ -20,6 +20,11 @@ Property<T>::Property(const Attribute *owner_id,
       cmd_set_(cmd_set) {}
 
 template <typename T>
+Attribute &Property<T>::get_attribute() {
+  return attr_;
+}
+
+template <typename T>
 const T &Property<T>::get_value() const {
   return std::get<T>(attr_.value);
 }
@@ -53,6 +58,7 @@ void Property<T>::set(const T &arg) {
   }
 }
 
+template class Property<uint8_t>;
 template class Property<uint32_t>;
 template class Property<std::string>;
 

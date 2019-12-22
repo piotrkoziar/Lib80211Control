@@ -20,7 +20,14 @@ Wiphy::Wiphy(const uint32_t &id)
             Attribute::ValueTypes::STRING,
             NL80211_CMD_GET_WIPHY,
             NL80211_CMD_SET_WIPHY),
-      all_attrs({&get_attribute(index_), &get_attribute(name_)}) {
+      max_scan_ssids_(&get_attribute(index_),
+                      NL80211_ATTR_MAX_NUM_SCAN_SSIDS,
+                      Attribute::ValueTypes::UINT8,
+                      NL80211_CMD_GET_WIPHY,
+                      NL80211_CMD_SET_WIPHY),
+      all_attrs({&get_attribute(index_),
+                 &get_attribute(name_),
+                 &get_attribute(max_scan_ssids_)}) {
   set_identifier(id);
 }
 

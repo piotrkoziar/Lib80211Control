@@ -45,10 +45,14 @@ void Communicator::add_attributes(
 
   for (auto &it : *attr_arg) {
     switch (it->value_type) {
-      case Attribute::ValueTypes::UINT32: {
+      case Attribute::ValueTypes::UINT8:
+        NLA_PUT_U8(message, it->type, std::get<uint8_t>(it->value));
+        break;
+
+      case Attribute::ValueTypes::UINT32:
         NLA_PUT_U32(message, it->type, std::get<uint32_t>(it->value));
         break;
-      }
+
       case Attribute::ValueTypes::STRING: {
         NLA_PUT_STRING(
             message, it->type, std::get<std::string>(it->value).c_str());
@@ -130,7 +134,7 @@ int Communicator::get_attributes(LibnlMessage *msg,
        type      = static_cast<Nl80211AttributeTypes>(type + 1)) {
     attribute_value = nla_data(attributes[type]);
     if (reinterpret_cast<long>(attribute_value) != 0x4) {
-      std::cout << int(type) << "\t" << attribute_value << std::endl;
+      std::cout << int(type) << std::endl;
     }
   }
 #endif
@@ -139,6 +143,10 @@ int Communicator::get_attributes(LibnlMessage *msg,
     if (attributes[it->type]) {
       attribute_value = nla_data(attributes[it->type]);
       switch (it->value_type) {
+        case Attribute::ValueTypes::UINT8:
+          it->value = *static_cast<uint8_t *>(attribute_value);
+          break;
+
         case Attribute::ValueTypes::UINT32:
           it->value = *static_cast<uint32_t *>(attribute_value);
           break;

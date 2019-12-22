@@ -1,7 +1,7 @@
 #ifndef WIPHYNLCONTROL_WIPHY_H_
 #define WIPHYNLCONTROL_WIPHY_H_
 
-#define WIPHY_ATTR_NUM 2
+#define WIPHY_ATTR_NUM 3
 
 #include <array>
 #include <string>
@@ -18,6 +18,7 @@ class Wiphy : public Entity {
  public:
   Property<uint32_t> index_;
   Property<std::string> name_;
+  Property<uint8_t> max_scan_ssids_;
 
  private:
   const std::array<struct Attribute *, WIPHY_ATTR_NUM> all_attrs;
