@@ -105,25 +105,8 @@ void Communicator::send_and_receive(LibnlSocket *socket,
 
 int Communicator::get_attributes(LibnlMessage *msg,
                                  const std::vector<Attribute *> *attr_read) {
-  if (!attr_read) {
-    return NL_OK;  // No attributes was specified to read from message.
-  }
-  // Get message header
-  LibnlGeMessageHeader *header;
-  if (!(header =
-            static_cast<LibnlGeMessageHeader *>(nlmsg_data(nlmsg_hdr(msg))))) {
-    return NL_OK;
-  }
-  // Get message attributes
-  LibnlAttribute *attributes[NL80211_ATTR_MAX + 1];
-  nla_parse(attributes,
-            NL80211_ATTR_MAX,
-            genlmsg_attrdata(header, 0),
-            genlmsg_attrlen(header, 0),
-            NULL);
-
   void *attribute_value;
-
+  LibnlAttribute *attributes[NL80211_ATTR_MAX + 1];
 #ifdef COM_DEBUG
   std::cout << "Received ATTRs:\n";
   for (auto type = NL80211_ATTR_UNSPEC; type < NL80211_ATTR_MAX;
@@ -134,6 +117,22 @@ int Communicator::get_attributes(LibnlMessage *msg,
     }
   }
 #endif
+
+  if (!attr_read) {
+    return NL_OK;  // No attributes was specified to read from message.
+  }
+  // Get message header
+  LibnlGeMessageHeader *header;
+  if (!(header =
+            static_cast<LibnlGeMessageHeader *>(nlmsg_data(nlmsg_hdr(msg))))) {
+    return NL_OK;
+  }
+  // Get message attributes
+  nla_parse(attributes,
+            NL80211_ATTR_MAX,
+            genlmsg_attrdata(header, 0),
+            genlmsg_attrlen(header, 0),
+            NULL);
 
   for (auto &it : *attr_read) {
     if (attributes[it->type]) {
