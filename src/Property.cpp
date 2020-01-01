@@ -46,5 +46,6 @@ void Property<T>::set(const T &arg) {
 
 template class Property<uint32_t>;
 template class Property<std::string>;
+template class Property<NestedAttr>;
 
 }  // namespace wiphynlcontrol

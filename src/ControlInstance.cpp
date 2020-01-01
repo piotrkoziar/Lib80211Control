@@ -3,12 +3,58 @@
 #include <memory>
 #include <variant>
 
+#include "netlink/attr.h"
+
 #include "ComControl.h"
 #include "Communicator.h"
 #include "Interface.h"
 #include "Wiphy.h"
 
 namespace wiphynlcontrol {
+
+
+void link_bss() {
+  int index = 3;
+  Attribute attr_arg(&index, NL80211_ATTR_IFINDEX, Attribute::ValueTypes::UINT32);
+  const auto arg = std::vector<const Attribute *>{&attr_arg};
+  NestedAttr bss_attr_val;
+  auto attr_read = Attribute(&bss_attr_val, NL80211_ATTR_BSS, Attribute::ValueTypes::NESTED_BSS);
+  const auto read = std::vector<Attribute *>{&attr_read};
+
+  struct nlattr *bss_attr[NL80211_BSS_MAX + 1] = {};
+  struct nla_policy bss_policy[NL80211_BSS_MAX + 1] = {};
+
+  bss_policy[NL80211_BSS_TSF] = { type : NLA_U64 };
+  bss_policy[NL80211_BSS_FREQUENCY] = { type : NLA_U32 };
+  bss_policy[NL80211_BSS_BSSID] = { };
+  bss_policy[NL80211_BSS_BEACON_INTERVAL] = { type : NLA_U16 };
+  bss_policy[NL80211_BSS_CAPABILITY] = { type : NLA_U16 };
+  bss_policy[NL80211_BSS_INFORMATION_ELEMENTS] = { };
+  bss_policy[NL80211_BSS_SIGNAL_MBM] = { type : NLA_U32 };
+  bss_policy[NL80211_BSS_SIGNAL_UNSPEC] = { type : NLA_U8 };
+  bss_policy[NL80211_BSS_STATUS] = { type : NLA_U32 };
+  bss_policy[10] = { type : NLA_U32 };
+
+  bss_attr_val.attr = &bss_attr[0];
+  bss_attr_val.policy = &bss_policy[0];
+
+  ComControl::get_communicator().challenge(NL80211_CMD_GET_SCAN, Message::Flags::DUMP, &arg, &read);
+
+  Property<NestedAttr> pro(&attr_arg,
+                            NL80211_ATTR_BSS,
+                            Attribute::ValueTypes::UINT48,
+                            NL80211_CMD_GET_SCAN,
+                            NL80211_CMD_UNSPEC);
+
+}
+
+void station() {
+    int index = 3;
+    Attribute attr_arg(&index, NL80211_ATTR_IFINDEX, Attribute::ValueTypes::UINT32);
+    const auto arg = std::vector<const Attribute *>{&attr_arg};
+    // auto read = Attribute(int(), NL80211_ATTR_BSS, Attribute::ValueTypes::STRING);
+    ComControl::get_communicator().challenge(NL80211_CMD_GET_STATION, Message::Flags::DUMP, &arg, NULL);
+}
 
 static void print(const std::string &a, const char *args) {
   std::cout << args << ": " << a << '\n';
@@ -41,6 +87,8 @@ class ControlInstance {
     try {
       // Test
       auto wiphy = std::make_shared<Wiphy>(0);
+      auto iface = std::make_shared<Interface>(4);
+
       print_wiphy(*wiphy.get());
       wiphy->name_.get();
       std::cout << "got name\n";
@@ -51,7 +99,6 @@ class ControlInstance {
       print_wiphy(*wiphy.get());
 
       std::cout << "\n\n\n";
-      auto iface = std::make_shared<Interface>(4);
 
       iface->mac_addr_.get();
       std::cout << "got mac\n";
@@ -74,6 +121,9 @@ class ControlInstance {
       std::cout << "got iface\n";
       print_iface(*iface2.get());
 
+      link_bss();
+      // station();
+
     } catch (std::exception &e) {
       std::cout << "Exception: " << e.what() << "\n";
       std::cout << "Communicator error report: "
@@ -85,8 +135,8 @@ class ControlInstance {
 }  // namespace wiphynlcontrol
 
 int main(int argc, char **argv) {
+  using namespace wiphynlcontrol;
   wiphynlcontrol::ControlInstance mynl_base;
   mynl_base.Main();
-
   return 0;
 }

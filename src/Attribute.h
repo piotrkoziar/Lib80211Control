@@ -8,10 +8,15 @@
 typedef enum nl80211_attrs Nl80211AttributeTypes;
 typedef struct nlattr LibnlAttribute;
 
+typedef struct NestedAttr {
+  struct nlattr **attr;
+  struct nla_policy *policy;
+} NestedAttr;
+
 namespace wiphynlcontrol {
 
 struct Attribute {
-  enum class ValueTypes { UINT32, UINT48, STRING };
+  enum class ValueTypes { UINT32, UINT48, STRING, NESTED_BSS };
   void  *value;
   const Nl80211AttributeTypes type;
   const ValueTypes value_type;

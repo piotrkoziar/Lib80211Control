@@ -3,6 +3,7 @@
 #include <netlink/genl/ctrl.h>
 #include <netlink/genl/genl.h>
 #include <netlink/netlink.h>
+#include <net/if.h>
 
 #include <iostream>
 #include <memory>
@@ -165,8 +166,67 @@ int Communicator::get_attributes(LibnlMessage *msg,
           if (!it->value) {
             break;
           }
-          static_cast<std::string *>(it->value)->assign(static_cast<const char *>(attribute_value));
+          static_cast<std::string *>(it->value)->assign(
+                  static_cast<const char *>(attribute_value));
           break;
+
+        case Attribute::ValueTypes::NESTED_BSS:
+          if (!it->value) {
+            break;
+          }
+
+          if (!static_cast<NestedAttr *>(it->value)->attr ||
+              !static_cast<NestedAttr *>(it->value)->policy) {
+            fprintf(stderr, "no policy/attr!\n");
+            break;
+          }
+
+          if (!attributes[NL80211_ATTR_BSS]) {
+            fprintf(stderr, "bss info missing!\n");
+            break;
+          }
+
+          struct nlattr *bss[NL80211_BSS_MAX + 1];
+          for (uint8_t i = 0; i < NL80211_BSS_MAX + 1; ++i) {
+            fprintf(stderr, "i %d!\n", i);
+            std::cout << " and " << static_cast<NestedAttr *>(it->value)->policy[i].type << "\n";
+            if (static_cast<NestedAttr *>(it->value)->policy[i].type > NLA_TYPE_MAX)
+              fprintf(stderr, "Too big!\n");
+          }
+
+          if (nla_parse_nested(static_cast<NestedAttr *>(it->value)->attr,
+                  NL80211_BSS_MAX,
+                  attributes[NL80211_ATTR_BSS],
+                  static_cast<NestedAttr *>(it->value)->policy)) {
+            fprintf(stderr, "failed to parse nested attributes!\n");
+            break;
+          }
+
+          if (!(static_cast<NestedAttr *>(it->value))->attr[NL80211_BSS_BSSID]) {
+            break;
+          }
+          if (!(static_cast<NestedAttr *>(it->value))->attr[NL80211_BSS_STATUS]) {
+            break;
+          }
+
+          // mac_addr_n2a(mac_addr, nla_data(bss[NL80211_BSS_BSSID]));
+          char dev[20];
+          if_indextoname(nla_get_u32(attributes[NL80211_ATTR_IFINDEX]), dev);
+          std::cout << "Interface " << dev << "\n";
+
+                    // switch (nla_get_u32(bss[NL80211_BSS_STATUS])) {
+                    // case NL80211_BSS_STATUS_ASSOCIATED:
+                    //   printf("Connected to %s (on %s)\n", mac_addr, dev);
+                    //   break;
+                    // case NL80211_BSS_STATUS_AUTHENTICATED:
+                    //   printf("Authenticated with %s (on %s)\n", mac_addr, dev);
+                    //   return NL_SKIP;
+                    // case NL80211_BSS_STATUS_IBSS_JOINED:
+                    //   printf("Joined IBSS %s (on %s)\n", mac_addr, dev);
+                    //   break;
+                    // default:
+                    //   return NL_SKIP;
+
         default:;
       }
     }
