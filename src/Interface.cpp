@@ -48,8 +48,8 @@ void Interface::get() {
       NL80211_CMD_GET_INTERFACE, Message::Flags::NONE, &attr_args, &attrs);
 }
 
-const uint32_t &Interface::get_identifier() const { return index_.get_value(); }
+uint32_t Interface::get_identifier() const { return index_.value_; }
 
-void Interface::set_identifier(const uint32_t &id) { index_.set_value(id); }
+void Interface::set_identifier(const uint32_t &id) { index_.value_ = id; }
 
 }  // namespace wiphynlcontrol

@@ -14,20 +14,11 @@ Property<T>::Property(const Attribute *owner_id,
                       const Attribute::ValueTypes &value_type,
                       const Nl80211Commands &cmd_get,
                       const Nl80211Commands &cmd_set)
-    : attr_(T(), type, value_type),
+    : value_(T()),
+      attr_(&value_, type, value_type),
       owner_identifier_(owner_id),
       cmd_get_(cmd_get),
       cmd_set_(cmd_set) {}
-
-template <typename T>
-const T &Property<T>::get_value() const {
-  return std::get<T>(attr_.value);
-}
-
-template <typename T>
-void Property<T>::set_value(T val) {
-  attr_.value = val;
-}
 
 template <typename T>
 const T &Property<T>::get() {
@@ -35,13 +26,13 @@ const T &Property<T>::get() {
   const auto attr_read = std::vector<Attribute *>{&attr_};
   ComControl::get_communicator().challenge(
       cmd_get_, Message::Flags::NONE, &attr_args, &attr_read);
-  return std::get<T>(attr_.value);
+  return value_;
 }
 
 template <typename T>
 void Property<T>::set(const T &arg) {
   // Create attribute object with new value.
-  Attribute attr_arg(arg, attr_.type, attr_.value_type);
+  Attribute attr_arg(const_cast<T *>(&arg), attr_.type, attr_.value_type);
   // Place the object in the vactor and add to the request for the Communicator.
   const auto attr_args =
       std::vector<const Attribute *>{owner_identifier_, &attr_arg};

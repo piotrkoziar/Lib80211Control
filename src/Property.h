@@ -14,6 +14,9 @@ template <typename T>
 class Property {
   friend class Entity;
 
+ public:
+  T value_;
+
  private:
   Attribute attr_;
   const Attribute *owner_identifier_;
@@ -27,8 +30,6 @@ class Property {
                     const Nl80211Commands &cmd_get,
                     const Nl80211Commands &cmd_set);
 
-  const T &get_value() const;
-  void set_value(T val);
   // In cases below, query the kernel.
   const T &get();
   void set(const T &arg);

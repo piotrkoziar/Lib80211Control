@@ -46,12 +46,12 @@ void Communicator::add_attributes(
   for (auto &it : *attr_arg) {
     switch (it->value_type) {
       case Attribute::ValueTypes::UINT32: {
-        NLA_PUT_U32(message, it->type, std::get<uint32_t>(it->value));
+        NLA_PUT_U32(message, it->type, *static_cast<uint32_t *>(it->value));
         break;
       }
       case Attribute::ValueTypes::STRING: {
         NLA_PUT_STRING(
-            message, it->type, std::get<std::string>(it->value).c_str());
+            message, it->type, static_cast<std::string *>(it->value)->c_str());
         break;
       }
       default: {
@@ -140,10 +140,16 @@ int Communicator::get_attributes(LibnlMessage *msg,
       attribute_value = nla_data(attributes[it->type]);
       switch (it->value_type) {
         case Attribute::ValueTypes::UINT32:
-          it->value = *static_cast<uint32_t *>(attribute_value);
+          if (!it->value) {
+            break;
+          }
+          *static_cast<uint32_t *>(it->value) = *static_cast<uint32_t *>(attribute_value);
           break;
 
         case Attribute::ValueTypes::UINT48:
+          if (!it->value) {
+            break;
+          }
           char tmp_str[18];
           sprintf(tmp_str,
                   "%02x:%02x:%02x:%02x:%02x:%02x",
@@ -153,11 +159,14 @@ int Communicator::get_attributes(LibnlMessage *msg,
                   *(static_cast<const char *>(attribute_value) + 3) & 0xff,
                   *(static_cast<const char *>(attribute_value) + 4) & 0xff,
                   *(static_cast<const char *>(attribute_value) + 5) & 0xff);
-          it->value = tmp_str;
+          static_cast<std::string *>(it->value)->assign(tmp_str);
           break;
 
         case Attribute::ValueTypes::STRING:
-          it->value = static_cast<const char *>(attribute_value);
+          if (!it->value) {
+            break;
+          }
+          static_cast<std::string *>(it->value)->assign(static_cast<const char *>(attribute_value));
           break;
         default:;
       }

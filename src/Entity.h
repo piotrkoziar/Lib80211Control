@@ -18,7 +18,7 @@ class Entity {
 
  public:
   // This member identifies the Entity.
-  virtual const uint32_t &get_identifier() const  = 0;
+  virtual uint32_t get_identifier() const  = 0;
   virtual void set_identifier(const uint32_t &id) = 0;
 };
 

@@ -19,8 +19,8 @@ static void print(const uint32_t &a, const char *args) {
 }
 
 static void print_wiphy(const Wiphy &wiphy) {
-  print(wiphy.index_.get_value(), "index");
-  print(wiphy.name_.get_value(), "name");
+  print(wiphy.index_.value_, "index");
+  print(wiphy.name_.value_, "name");
   // print(*wiphy.bands_, "bands");
   // print(*wiphy.channel_type_, "channel_type");
   // print(*wiphy.txq_params_, "txq_params");
@@ -28,11 +28,11 @@ static void print_wiphy(const Wiphy &wiphy) {
 }
 
 static void print_iface(const Interface &iface) {
-  print(iface.index_.get_value(), "index");
-  print(iface.name_.get_value(), "name");
-  print(iface.type_.get_value(), "interface type");
-  print(iface.mac_addr_.get_value(), "mac addr");
-  print(iface.ssid_.get_value(), "SSID");
+  print(iface.index_.value_, "index");
+  print(iface.name_.value_, "name");
+  print(iface.type_.value_, "interface type");
+  print(iface.mac_addr_.value_, "mac addr");
+  print(iface.ssid_.value_, "SSID");
 }
 
 class ControlInstance {

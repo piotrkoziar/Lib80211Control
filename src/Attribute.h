@@ -4,7 +4,6 @@
 #include <linux/nl80211.h>
 
 #include <string>
-#include <variant>
 
 typedef enum nl80211_attrs Nl80211AttributeTypes;
 typedef struct nlattr LibnlAttribute;
@@ -13,10 +12,10 @@ namespace wiphynlcontrol {
 
 struct Attribute {
   enum class ValueTypes { UINT32, UINT48, STRING };
-  std::variant<std::string, uint32_t> value;
+  void  *value;
   const Nl80211AttributeTypes type;
   const ValueTypes value_type;
-  Attribute(const std::variant<std::string, uint32_t> &val,
+  Attribute(void *val,
             const Nl80211AttributeTypes &tp,
             const ValueTypes &val_type);
 };
