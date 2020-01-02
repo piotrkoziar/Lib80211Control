@@ -186,7 +186,6 @@ int Communicator::get_attributes(LibnlMessage *msg,
             break;
           }
 
-          struct nlattr *bss[NL80211_BSS_MAX + 1];
           for (uint8_t i = 0; i < NL80211_BSS_MAX + 1; ++i) {
             fprintf(stderr, "i %d!\n", i);
             std::cout << " and " << static_cast<NestedAttr *>(it->value)->policy[i].type << "\n";
@@ -213,6 +212,17 @@ int Communicator::get_attributes(LibnlMessage *msg,
           char dev[20];
           if_indextoname(nla_get_u32(attributes[NL80211_ATTR_IFINDEX]), dev);
           std::cout << "Interface " << dev << "\n";
+
+          for (uint8_t i = 0; i < NL80211_BSS_MAX + 1; ++i) {
+            struct nlattr *attri = static_cast<NestedAttr *>(it->value)->attr[i];
+            if (!attri) {
+              continue;
+            }
+
+            void * nested_attribute_value = nla_data(attri);
+            std::cout << "Value: " << *(uint32_t *)nested_attribute_value << "\n";
+
+          }
 
                     // switch (nla_get_u32(bss[NL80211_BSS_STATUS])) {
                     // case NL80211_BSS_STATUS_ASSOCIATED:
