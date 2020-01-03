@@ -1,7 +1,7 @@
 #ifndef WIPHYNLCONTROL_INTERFACE_H_
 #define WIPHYNLCONTROL_INTERFACE_H_
 
-#define IFACE_ATTR_NUM 5
+#define IFACE_ATTR_NUM 6
 
 #include <array>
 #include <string>
@@ -15,6 +15,9 @@ class Interface : public Entity {
  public:
   explicit Interface(const uint32_t &id);
 
+ private:
+  Property<char>bss_;
+
  public:
   Property<uint32_t> index_;
   Property<std::string> name_;
@@ -22,6 +25,7 @@ class Interface : public Entity {
   // mac addr stored as %02x:%02x:%02x:%02x:%02x:%02x string
   Property<std::string> mac_addr_;
   Property<std::string> ssid_;
+  Property<uint32_t> bss_frequency_;
 
  private:
   const std::array<struct Attribute *, IFACE_ATTR_NUM> all_attrs;

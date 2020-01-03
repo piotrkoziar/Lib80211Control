@@ -18,7 +18,7 @@ void link_bss() {
   Attribute attr_arg(&index, NL80211_ATTR_IFINDEX, Attribute::ValueTypes::UINT32, NULL);
   const auto arg = std::vector<const Attribute *>{&attr_arg};
   NestedAttr bss_attr_val;
-  auto attr_read = Attribute(&bss_attr_val, NL80211_ATTR_BSS, Attribute::ValueTypes::NESTED_BSS, NULL);
+  auto attr_read = Attribute(&bss_attr_val, NL80211_ATTR_BSS, Attribute::ValueTypes::NESTED, NULL);
   const auto read = std::vector<Attribute *>{&attr_read};
 
   struct nlattr *bss_attr[NL80211_BSS_MAX + 1] = {};
@@ -48,13 +48,13 @@ void link_bss() {
 
 }
 
-void station() {
-    int index = 3;
-    Attribute attr_arg(&index, NL80211_ATTR_IFINDEX, Attribute::ValueTypes::UINT32, NULL);
-    const auto arg = std::vector<const Attribute *>{&attr_arg};
-    // auto read = Attribute(int(), NL80211_ATTR_BSS, Attribute::ValueTypes::STRING);
-    ComControl::get_communicator().challenge(NL80211_CMD_GET_STATION, Message::Flags::DUMP, &arg, NULL);
-}
+// void station() {
+//     int index = 3;
+//     Attribute attr_arg(&index, NL80211_ATTR_IFINDEX, Attribute::ValueTypes::UINT32, NULL);
+//     const auto arg = std::vector<const Attribute *>{&attr_arg};
+//     // auto read = Attribute(int(), NL80211_ATTR_BSS, Attribute::ValueTypes::STRING);
+//     ComControl::get_communicator().challenge(NL80211_CMD_GET_STATION, Message::Flags::DUMP, &arg, NULL);
+// }
 
 static void print(const std::string &a, const char *args) {
   std::cout << args << ": " << a << '\n';
@@ -87,41 +87,44 @@ class ControlInstance {
     try {
       // Test
       auto wiphy = std::make_shared<Wiphy>(0);
-      auto iface = std::make_shared<Interface>(4);
+      auto iface = std::make_shared<Interface>(3);
 
-      print_wiphy(*wiphy.get());
-      wiphy->name_.get();
-      std::cout << "got name\n";
-      print_wiphy(*wiphy.get());
+      std::cout << "Frequency " << iface->bss_frequency_.get() << "\n";
 
-      wiphy->get();
-      std::cout << "got wiphy\n";
-      print_wiphy(*wiphy.get());
 
-      std::cout << "\n\n\n";
+      // print_wiphy(*wiphy.get());
+      // wiphy->name_.get();
+      // std::cout << "got name\n";
+      // print_wiphy(*wiphy.get());
 
-      iface->mac_addr_.get();
-      std::cout << "got mac\n";
-      print_iface(*iface.get());
+      // wiphy->get();
+      // std::cout << "got wiphy\n";
+      // print_wiphy(*wiphy.get());
 
-      iface->name_.get();
-      std::cout << "got name\n";
-      print_iface(*iface.get());
+      // std::cout << "\n\n\n";
 
-      iface->ssid_.get();
-      std::cout << "got ssid\n";
-      print_iface(*iface.get());
+      // iface->mac_addr_.get();
+      // std::cout << "got mac\n";
+      // print_iface(*iface.get());
 
-      iface->type_.get();
-      std::cout << "got type\n";
-      print_iface(*iface.get());
+      // iface->name_.get();
+      // std::cout << "got name\n";
+      // print_iface(*iface.get());
 
-      auto iface2 = std::make_shared<Interface>(3);
-      iface2->get();
-      std::cout << "got iface\n";
-      print_iface(*iface2.get());
+      // iface->ssid_.get();
+      // std::cout << "got ssid\n";
+      // print_iface(*iface.get());
 
-      link_bss();
+      // iface->type_.get();
+      // std::cout << "got type\n";
+      // print_iface(*iface.get());
+
+      // auto iface2 = std::make_shared<Interface>(3);
+      // iface2->get();
+      // std::cout << "got iface\n";
+      // print_iface(*iface2.get());
+
+      // link_bss();
       // station();
 
     } catch (std::exception &e) {

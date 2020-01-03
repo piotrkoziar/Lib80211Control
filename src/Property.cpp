@@ -25,8 +25,13 @@ template <typename T>
 const T &Property<T>::get() {
   const auto attr_args = std::vector<const Attribute *>{owner_identifier_};
   const auto attr_read = std::vector<Attribute *>{&attr_};
-  ComControl::get_communicator().challenge(
-      cmd_get_, Message::Flags::NONE, &attr_args, &attr_read);
+  if (cmd_get_ == NL80211_CMD_GET_SCAN) {  // Scan must have DUMP flag.
+    ComControl::get_communicator().challenge(cmd_get_, Message::Flags::DUMP,
+                                             &attr_args, &attr_read);
+  } else {
+  ComControl::get_communicator().challenge(cmd_get_, Message::Flags::NONE,
+                                           &attr_args, &attr_read);
+  }
   return value_;
 }
 
@@ -47,6 +52,7 @@ void Property<T>::set(const T &arg) {
 
 template class Property<uint32_t>;
 template class Property<std::string>;
+template class Property<char>;
 template class Property<NestedAttr>;
 
 }  // namespace wiphynlcontrol

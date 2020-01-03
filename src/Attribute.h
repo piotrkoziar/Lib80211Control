@@ -16,15 +16,15 @@ typedef struct NestedAttr {
 namespace wiphynlcontrol {
 
 struct Attribute {
-  enum class ValueTypes { UINT32, UINT48, STRING, NESTED_BSS };
+  enum class ValueTypes { UINT32, UINT48, STRING, NESTED };
   void  *value;
   const Nl80211AttributeTypes type;
   const ValueTypes value_type;
-  void *parent;
+  const Attribute *parent;
   Attribute(void *val,
             const Nl80211AttributeTypes &tp,
             const ValueTypes &val_type,
-            const Attribute *parent);
+            const Attribute *par);
 };
 
 }  // namespace wiphynlcontrol

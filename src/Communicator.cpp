@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <memory>
+#include <memory>
 
 #include "Exception.h"
 
@@ -108,6 +109,7 @@ int Communicator::get_attributes(LibnlMessage *msg,
                                  const std::vector<Attribute *> *attr_read) {
   void *attribute_value;
   LibnlAttribute *attributes[NL80211_ATTR_MAX + 1];
+
 #ifdef COM_DEBUG
   std::cout << "Received ATTRs:\n";
   for (auto type = NL80211_ATTR_UNSPEC; type < NL80211_ATTR_MAX;
@@ -135,117 +137,151 @@ int Communicator::get_attributes(LibnlMessage *msg,
             genlmsg_attrlen(header, 0),
             NULL);
 
-  for (auto &it : *attr_read) {
-    if (attributes[it->type]) {
-      attribute_value = nla_data(attributes[it->type]);
-      switch (it->value_type) {
-        case Attribute::ValueTypes::UINT32:
-          if (!it->value) {
-            break;
-          }
-          *static_cast<uint32_t *>(it->value) =
-              *static_cast<uint32_t *>(attribute_value);
-          break;
+  LibnlAttribute **parent_attributes = attributes, **nested_attributes;
+  const Attribute *attr_top;
+  std::vector<const Attribute *> attr_vec;
+  int attribute_type;  // Type of the attribute casted to int.
 
-        case Attribute::ValueTypes::UINT48:
-          if (!it->value) {
-            break;
-          }
-          char tmp_str[18];
-          sprintf(tmp_str,
-                  "%02x:%02x:%02x:%02x:%02x:%02x",
-                  *(static_cast<const char *>(attribute_value)) & 0xff,
-                  *(static_cast<const char *>(attribute_value) + 1) & 0xff,
-                  *(static_cast<const char *>(attribute_value) + 2) & 0xff,
-                  *(static_cast<const char *>(attribute_value) + 3) & 0xff,
-                  *(static_cast<const char *>(attribute_value) + 4) & 0xff,
-                  *(static_cast<const char *>(attribute_value) + 5) & 0xff);
-          static_cast<std::string *>(it->value)->assign(tmp_str);
-          break;
+  for (auto &attribute_to_read : *attr_read) {
+    attr_top = attribute_to_read;
+    while (attr_top->parent) {
+      attr_top = attr_top->parent;
+      attr_vec.push_back(attr_top);
+      std::cout << "Iteration in attr_top loop \n";
+    }  // Get the parent on the top. It will be obtained from the attributes.
 
-        case Attribute::ValueTypes::STRING:
-          if (!it->value) {
-            break;
-          }
-          static_cast<std::string *>(it->value)->assign(
-                  static_cast<const char *>(attribute_value));
-          break;
-
-        case Attribute::ValueTypes::NESTED_BSS:
-          if (!it->value) {
-            break;
-          }
-
-          if (!static_cast<NestedAttr *>(it->value)->attr ||
-              !static_cast<NestedAttr *>(it->value)->policy) {
-            fprintf(stderr, "no policy/attr!\n");
-            break;
-          }
-
-          if (!attributes[NL80211_ATTR_BSS]) {
-            fprintf(stderr, "bss info missing!\n");
-            break;
-          }
-
-          for (uint8_t i = 0; i < NL80211_BSS_MAX + 1; ++i) {
-            fprintf(stderr, "i %d!\n", i);
-            std::cout << " and "
-                      << static_cast<NestedAttr *>(it->value)->policy[i].type
-                      << "\n";
-            if (static_cast<NestedAttr *>(it->value)->policy[i].type >
-                NLA_TYPE_MAX)
-              fprintf(stderr, "Too big!\n");
-          }
-
-          if (nla_parse_nested(static_cast<NestedAttr *>(it->value)->attr,
-                  NL80211_BSS_MAX,
-                  attributes[NL80211_ATTR_BSS],
-                  static_cast<NestedAttr *>(it->value)->policy)) {
-            fprintf(stderr, "failed to parse nested attributes!\n");
-            break;
-          }
-
-          if (!(static_cast<NestedAttr *>(it->value))
-                   ->attr[NL80211_BSS_BSSID]) {
-            break;
-          }
-          if (!(static_cast<NestedAttr *>(it->value))
-                   ->attr[NL80211_BSS_STATUS]) {
-            break;
-          }
-
-          // mac_addr_n2a(mac_addr, nla_data(bss[NL80211_BSS_BSSID]));
-          char dev[20];
-          if_indextoname(nla_get_u32(attributes[NL80211_ATTR_IFINDEX]), dev);
-          std::cout << "Interface " << dev << "\n";
-
-          for (uint8_t i = 0; i < NL80211_BSS_MAX + 1; ++i) {
-            struct nlattr *attri =
-                static_cast<NestedAttr *>(it->value)->attr[i];
-            if (!attri) {
-              continue;
-            }
-
-            void *nested_attribute_value = nla_data(attri);
-            std::cout << "Value: " << *(uint32_t *)nested_attribute_value
-                      << "\n";
-          }
-
-                    // switch (nla_get_u32(bss[NL80211_BSS_STATUS])) {
-                    // case NL80211_BSS_STATUS_ASSOCIATED:
-                    //   printf("Connected to %s (on %s)\n", mac_addr, dev);
-                    //   break;
-                    // case NL80211_BSS_STATUS_AUTHENTICATED:
-                    //   printf("Authenticated with %s (on %s)\n", mac_addr, dev);
-                    //   return NL_SKIP;
-                    // case NL80211_BSS_STATUS_IBSS_JOINED:
-                    //   printf("Joined IBSS %s (on %s)\n", mac_addr, dev);
-                    //   break;
-                    // default:
-                    //   return NL_SKIP;
-
-        default:;
+    for (auto i = attr_vec.size(); i > 0; --i) {
+      attribute_type    = static_cast<int>(attr_vec[i - 1]->type);
+      nested_attributes = new LibnlAttribute*[attribute_type];
+      if (nla_parse_nested(nested_attributes, attribute_type,
+                           parent_attributes[attribute_type], NULL) != 0) {
+        if (parent_attributes != attributes) {
+          delete[] parent_attributes;
+        }
+        delete[] nested_attributes;
+        fprintf(stderr, "failed to parse nested attributes!\n");
+        return NL_SKIP;
       }
+      if (parent_attributes != attributes) {
+        std::cout << "Deleted payload " << "\n";
+        delete[] parent_attributes;
+      }
+      parent_attributes = nested_attributes;
+      std::cout << "Iteration " << i << "\n";
+    }
+
+    attribute_type = static_cast<int>(attribute_to_read->type);
+    if (parent_attributes[attribute_type]) {
+      attribute_value = nla_data(parent_attributes[attribute_type]);
+    }
+
+    switch (attribute_to_read->value_type) {
+      case Attribute::ValueTypes::UINT32:
+        if (!attribute_to_read->value) {
+          break;
+        }
+        *static_cast<uint32_t *>(attribute_to_read->value) =
+            *static_cast<uint32_t *>(attribute_value);
+        break;
+
+      case Attribute::ValueTypes::UINT48:
+        if (!attribute_to_read->value) {
+          break;
+        }
+        char tmp_str[18];
+        sprintf(tmp_str,
+                "%02x:%02x:%02x:%02x:%02x:%02x",
+                *(static_cast<const char *>(attribute_value)) & 0xff,
+                *(static_cast<const char *>(attribute_value) + 1) & 0xff,
+                *(static_cast<const char *>(attribute_value) + 2) & 0xff,
+                *(static_cast<const char *>(attribute_value) + 3) & 0xff,
+                *(static_cast<const char *>(attribute_value) + 4) & 0xff,
+                *(static_cast<const char *>(attribute_value) + 5) & 0xff);
+        static_cast<std::string *>(attribute_to_read->value)->assign(tmp_str);
+        break;
+
+      case Attribute::ValueTypes::STRING:
+        if (!attribute_to_read->value) {
+          break;
+        }
+        static_cast<std::string *>(attribute_to_read->value)->assign(
+                static_cast<const char *>(attribute_value));
+        break;
+
+      case Attribute::ValueTypes::NESTED:
+        if (!attribute_to_read->value) {
+          break;
+        }
+
+        if (!static_cast<NestedAttr *>(attribute_to_read->value)->attr ||
+            !static_cast<NestedAttr *>(attribute_to_read->value)->policy) {
+          fprintf(stderr, "no policy/attr!\n");
+          break;
+        }
+
+        if (!attributes[NL80211_ATTR_BSS]) {
+          fprintf(stderr, "bss info missing!\n");
+          break;
+        }
+
+        for (uint8_t i = 0; i < NL80211_BSS_MAX + 1; ++i) {
+          fprintf(stderr, "i %d!\n", i);
+          std::cout << " and "
+                    << static_cast<NestedAttr *>(attribute_to_read->value)->policy[i].type
+                    << "\n";
+          if (static_cast<NestedAttr *>(attribute_to_read->value)->policy[i].type >
+              NLA_TYPE_MAX)
+            fprintf(stderr, "Too big!\n");
+        }
+
+        if (nla_parse_nested(static_cast<NestedAttr *>(attribute_to_read->value)->attr,
+                NL80211_BSS_MAX,
+                attributes[NL80211_ATTR_BSS],
+                static_cast<NestedAttr *>(attribute_to_read->value)->policy)) {
+          fprintf(stderr, "failed to parse nested attributes!\n");
+          break;
+        }
+
+        if (!(static_cast<NestedAttr *>(attribute_to_read->value))
+                  ->attr[NL80211_BSS_BSSID]) {
+          break;
+        }
+        if (!(static_cast<NestedAttr *>(attribute_to_read->value))
+                  ->attr[NL80211_BSS_STATUS]) {
+          break;
+        }
+
+        // mac_addr_n2a(mac_addr, nla_data(bss[NL80211_BSS_BSSID]));
+        char dev[20];
+        if_indextoname(nla_get_u32(attributes[NL80211_ATTR_IFINDEX]), dev);
+        std::cout << "Interface " << dev << "\n";
+
+        for (uint8_t i = 0; i < NL80211_BSS_MAX + 1; ++i) {
+          struct nlattr *attri =
+              static_cast<NestedAttr *>(attribute_to_read->value)->attr[i];
+          if (!attri) {
+            continue;
+          }
+
+          void *nested_attribute_value = nla_data(attri);
+          std::cout << "Value: " << *(uint32_t *)nested_attribute_value
+                    << "\n";
+        }
+
+                  // switch (nla_get_u32(bss[NL80211_BSS_STATUS])) {
+                  // case NL80211_BSS_STATUS_ASSOCIATED:
+                  //   printf("Connected to %s (on %s)\n", mac_addr, dev);
+                  //   break;
+                  // case NL80211_BSS_STATUS_AUTHENTICATED:
+                  //   printf("Authenticated with %s (on %s)\n", mac_addr, dev);
+                  //   return NL_SKIP;
+                  // case NL80211_BSS_STATUS_IBSS_JOINED:
+                  //   printf("Joined IBSS %s (on %s)\n", mac_addr, dev);
+                  //   break;
+                  // default:
+                  //   return NL_SKIP;
+
+      default:;
     }
   }
   return NL_OK;
