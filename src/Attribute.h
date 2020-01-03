@@ -20,9 +20,11 @@ struct Attribute {
   void  *value;
   const Nl80211AttributeTypes type;
   const ValueTypes value_type;
+  void *parent;
   Attribute(void *val,
             const Nl80211AttributeTypes &tp,
-            const ValueTypes &val_type);
+            const ValueTypes &val_type,
+            const Attribute *parent);
 };
 
 }  // namespace wiphynlcontrol

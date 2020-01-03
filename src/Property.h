@@ -28,7 +28,8 @@ class Property {
                     const Nl80211AttributeTypes &type,
                     const Attribute::ValueTypes &value_type,
                     const Nl80211Commands &cmd_get,
-                    const Nl80211Commands &cmd_set);
+                    const Nl80211Commands &cmd_set,
+                    const Attribute *parent = NULL);
 
   // In cases below, query the kernel.
   const T &get();

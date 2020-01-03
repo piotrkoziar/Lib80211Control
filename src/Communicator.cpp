@@ -143,7 +143,8 @@ int Communicator::get_attributes(LibnlMessage *msg,
           if (!it->value) {
             break;
           }
-          *static_cast<uint32_t *>(it->value) = *static_cast<uint32_t *>(attribute_value);
+          *static_cast<uint32_t *>(it->value) =
+              *static_cast<uint32_t *>(attribute_value);
           break;
 
         case Attribute::ValueTypes::UINT48:
@@ -188,8 +189,11 @@ int Communicator::get_attributes(LibnlMessage *msg,
 
           for (uint8_t i = 0; i < NL80211_BSS_MAX + 1; ++i) {
             fprintf(stderr, "i %d!\n", i);
-            std::cout << " and " << static_cast<NestedAttr *>(it->value)->policy[i].type << "\n";
-            if (static_cast<NestedAttr *>(it->value)->policy[i].type > NLA_TYPE_MAX)
+            std::cout << " and "
+                      << static_cast<NestedAttr *>(it->value)->policy[i].type
+                      << "\n";
+            if (static_cast<NestedAttr *>(it->value)->policy[i].type >
+                NLA_TYPE_MAX)
               fprintf(stderr, "Too big!\n");
           }
 
@@ -201,10 +205,12 @@ int Communicator::get_attributes(LibnlMessage *msg,
             break;
           }
 
-          if (!(static_cast<NestedAttr *>(it->value))->attr[NL80211_BSS_BSSID]) {
+          if (!(static_cast<NestedAttr *>(it->value))
+                   ->attr[NL80211_BSS_BSSID]) {
             break;
           }
-          if (!(static_cast<NestedAttr *>(it->value))->attr[NL80211_BSS_STATUS]) {
+          if (!(static_cast<NestedAttr *>(it->value))
+                   ->attr[NL80211_BSS_STATUS]) {
             break;
           }
 
@@ -214,14 +220,15 @@ int Communicator::get_attributes(LibnlMessage *msg,
           std::cout << "Interface " << dev << "\n";
 
           for (uint8_t i = 0; i < NL80211_BSS_MAX + 1; ++i) {
-            struct nlattr *attri = static_cast<NestedAttr *>(it->value)->attr[i];
+            struct nlattr *attri =
+                static_cast<NestedAttr *>(it->value)->attr[i];
             if (!attri) {
               continue;
             }
 
-            void * nested_attribute_value = nla_data(attri);
-            std::cout << "Value: " << *(uint32_t *)nested_attribute_value << "\n";
-
+            void *nested_attribute_value = nla_data(attri);
+            std::cout << "Value: " << *(uint32_t *)nested_attribute_value
+                      << "\n";
           }
 
                     // switch (nla_get_u32(bss[NL80211_BSS_STATUS])) {

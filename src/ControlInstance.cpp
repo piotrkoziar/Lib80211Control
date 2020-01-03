@@ -15,10 +15,10 @@ namespace wiphynlcontrol {
 
 void link_bss() {
   int index = 3;
-  Attribute attr_arg(&index, NL80211_ATTR_IFINDEX, Attribute::ValueTypes::UINT32);
+  Attribute attr_arg(&index, NL80211_ATTR_IFINDEX, Attribute::ValueTypes::UINT32, NULL);
   const auto arg = std::vector<const Attribute *>{&attr_arg};
   NestedAttr bss_attr_val;
-  auto attr_read = Attribute(&bss_attr_val, NL80211_ATTR_BSS, Attribute::ValueTypes::NESTED_BSS);
+  auto attr_read = Attribute(&bss_attr_val, NL80211_ATTR_BSS, Attribute::ValueTypes::NESTED_BSS, NULL);
   const auto read = std::vector<Attribute *>{&attr_read};
 
   struct nlattr *bss_attr[NL80211_BSS_MAX + 1] = {};
@@ -50,7 +50,7 @@ void link_bss() {
 
 void station() {
     int index = 3;
-    Attribute attr_arg(&index, NL80211_ATTR_IFINDEX, Attribute::ValueTypes::UINT32);
+    Attribute attr_arg(&index, NL80211_ATTR_IFINDEX, Attribute::ValueTypes::UINT32, NULL);
     const auto arg = std::vector<const Attribute *>{&attr_arg};
     // auto read = Attribute(int(), NL80211_ATTR_BSS, Attribute::ValueTypes::STRING);
     ComControl::get_communicator().challenge(NL80211_CMD_GET_STATION, Message::Flags::DUMP, &arg, NULL);

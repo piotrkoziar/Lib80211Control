@@ -13,9 +13,10 @@ Property<T>::Property(const Attribute *owner_id,
                       const Nl80211AttributeTypes &type,
                       const Attribute::ValueTypes &value_type,
                       const Nl80211Commands &cmd_get,
-                      const Nl80211Commands &cmd_set)
+                      const Nl80211Commands &cmd_set,
+                      const Attribute *parent)
     : value_(T()),
-      attr_(&value_, type, value_type),
+      attr_(&value_, type, value_type, parent),
       owner_identifier_(owner_id),
       cmd_get_(cmd_get),
       cmd_set_(cmd_set) {}
@@ -32,7 +33,7 @@ const T &Property<T>::get() {
 template <typename T>
 void Property<T>::set(const T &arg) {
   // Create attribute object with new value.
-  Attribute attr_arg(const_cast<T *>(&arg), attr_.type, attr_.value_type);
+  Attribute attr_arg(const_cast<T *>(&arg), attr_.type, attr_.value_type, NULL);
   // Place the object in the vactor and add to the request for the Communicator.
   const auto attr_args =
       std::vector<const Attribute *>{owner_identifier_, &attr_arg};
