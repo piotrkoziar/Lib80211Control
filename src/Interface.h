@@ -1,7 +1,7 @@
 #ifndef WIPHYNLCONTROL_INTERFACE_H_
 #define WIPHYNLCONTROL_INTERFACE_H_
 
-#define IFACE_ATTR_NUM 6
+#define IFACE_ATTR_NUM 5
 
 #include <array>
 #include <string>

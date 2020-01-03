@@ -147,14 +147,11 @@ int Communicator::get_attributes(LibnlMessage *msg,
   for (auto &attribute_to_read : *attr_read) {
     // Push all parents (from bottom to top) to the vector.
     attr_top = attribute_to_read;
-    std::cout << "Before top loop\n";
-    if (attr_top->parent)
-      std::cout << "attr top if top loop\n";
     while (attr_top->parent) {
-      std::cout << "In top loop\n";
+      // std::cout << "In top loop\n";
       attr_top = attr_top->parent;
       attr_vec.push_back(attr_top);
-      std::cout << "Attr top loop\n";
+      // std::cout << "Attr top loop\n";
     }
     std::cout << "After top loop\n";
     // Get the attribute value. The value is true only for not-nested
@@ -162,7 +159,7 @@ int Communicator::get_attributes(LibnlMessage *msg,
     attribute_to_read_type = static_cast<int>(attribute_to_read->type);
     if ((attribute_to_read_type <= NL80211_ATTR_MAX) &&
         (attributes.get()[attribute_to_read_type])) {
-      std::cout << "attributes get value\n";
+      std::cout << "attributes get value\n" << attribute_to_read_type << "\n";
       attribute_to_read_value =
           nla_data(attributes.get()[attribute_to_read_type]);
     }

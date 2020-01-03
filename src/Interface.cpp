@@ -51,8 +51,7 @@ Interface::Interface(const uint32_t &id)
                  &get_attribute(name_),
                  &get_attribute(type_),
                  &get_attribute(mac_addr_),
-                 &get_attribute(ssid_),
-                 &get_attribute(bss_frequency_)}) {
+                 &get_attribute(ssid_)}) {
   set_identifier(id);
 }  // namespace wiphynlcontrol
 
