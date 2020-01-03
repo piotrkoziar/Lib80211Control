@@ -109,7 +109,7 @@ int Communicator::get_attributes(LibnlMessage *msg,
                                  const std::vector<Attribute *> *attr_read) {
   void *attribute_to_read_value;
   int attribute_to_read_type;
-  int attribute_type;  // Type of the attribute cast to int.
+  int attribute_type;  // Type of attribute cast to int.
   int result;
   std::unique_ptr<LibnlAttribute *[]> parent_attributes, nested_attributes;
   static auto attributes =
@@ -147,21 +147,26 @@ int Communicator::get_attributes(LibnlMessage *msg,
   for (auto &attribute_to_read : *attr_read) {
     // Push all parents (from bottom to top) to the vector.
     attr_top = attribute_to_read;
+    std::cout << "Before top loop\n";
+    if (attr_top->parent)
+      std::cout << "attr top if top loop\n";
     while (attr_top->parent) {
+      std::cout << "In top loop\n";
       attr_top = attr_top->parent;
       attr_vec.push_back(attr_top);
-      std::cout << "Iteration in attr_top loop \n";
+      std::cout << "Attr top loop\n";
     }
-
+    std::cout << "After top loop\n";
     // Get the attribute value. The value is true only for not-nested
     // attributes.
     attribute_to_read_type = static_cast<int>(attribute_to_read->type);
     if ((attribute_to_read_type <= NL80211_ATTR_MAX) &&
         (attributes.get()[attribute_to_read_type])) {
+      std::cout << "attributes get value\n";
       attribute_to_read_value =
-          nla_data(parent_attributes[attribute_to_read_type]);
+          nla_data(attributes.get()[attribute_to_read_type]);
     }
-
+    std::cout << "Before nested loop\n";
     // Enter the loop only if nested.
     for (auto i = attr_vec.size(); i > 0; --i) {
       attribute_type = static_cast<int>(attr_vec[i - 1]->type);
@@ -178,10 +183,9 @@ int Communicator::get_attributes(LibnlMessage *msg,
       }
 
       if (result != 0) {
-        fprintf(stderr, "failed to parse nested attributes!\n");
         return NL_SKIP;
       }
-
+      std::cout << "Nested loop\n";
       parent_attributes = std::move(nested_attributes);
       if (i > 1) {
         continue;
@@ -192,9 +196,8 @@ int Communicator::get_attributes(LibnlMessage *msg,
       if ((attribute_to_read_type <= attribute_type) &&
           (parent_attributes.get()[attribute_to_read_type])) {
         attribute_to_read_value =
-            nla_data(parent_attributes[attribute_to_read_type]);
+            nla_data(parent_attributes.get()[attribute_to_read_type]);
       }
-      std::cout << "Iteration " << i << "\n";
     }
 
     switch (attribute_to_read->value_type) {
@@ -229,84 +232,6 @@ int Communicator::get_attributes(LibnlMessage *msg,
         static_cast<std::string *>(attribute_to_read->value)->assign(
                 static_cast<const char *>(attribute_to_read_value));
         break;
-
-        // case Attribute::ValueTypes::NESTED:
-        //   if (!attribute_to_read->value) {
-        //     break;
-        //   }
-
-        //   if (!static_cast<NestedAttr *>(attribute_to_read->value)->attr ||
-        //       !static_cast<NestedAttr *>(attribute_to_read->value)->policy) {
-        //     fprintf(stderr, "no policy/attr!\n");
-        //     break;
-        //   }
-
-        //   if (!attributes.get()[NL80211_ATTR_BSS]) {
-        //     fprintf(stderr, "bss info missing!\n");
-        //     break;
-        //   }
-
-        //   for (uint8_t i = 0; i < NL80211_BSS_MAX + 1; ++i) {
-        //     fprintf(stderr, "i %d!\n", i);
-        //     std::cout << " and "
-        //               << static_cast<NestedAttr
-        //               *>(attribute_to_read->value)->policy[i].type
-        //               << "\n";
-        //     if (static_cast<NestedAttr
-        //     *>(attribute_to_read->value)->policy[i].type >
-        //         NLA_TYPE_MAX)
-        //       fprintf(stderr, "Too big!\n");
-        //   }
-
-        //   if (nla_parse_nested(static_cast<NestedAttr
-        //   *>(attribute_to_read->value)->attr,
-        //           NL80211_BSS_MAX,
-        //           attributes.get()[NL80211_ATTR_BSS],
-        //           static_cast<NestedAttr
-        //           *>(attribute_to_read->value)->policy)) {
-        //     fprintf(stderr, "failed to parse nested attributes!\n");
-        //     break;
-        //   }
-
-        //   if (!(static_cast<NestedAttr *>(attribute_to_read->value))
-        //             ->attr[NL80211_BSS_BSSID]) {
-        //     break;
-        //   }
-        //   if (!(static_cast<NestedAttr *>(attribute_to_read->value))
-        //             ->attr[NL80211_BSS_STATUS]) {
-        //     break;
-        //   }
-
-        //   // mac_addr_n2a(mac_addr, nla_data(bss[NL80211_BSS_BSSID]));
-        //   char dev[20];
-        //   if_indextoname(nla_get_u32(attributes.get()[NL80211_ATTR_IFINDEX]),
-        //   dev); std::cout << "Interface " << dev << "\n";
-
-        //   for (uint8_t i = 0; i < NL80211_BSS_MAX + 1; ++i) {
-        //     struct nlattr *attri =
-        //         static_cast<NestedAttr *>(attribute_to_read->value)->attr[i];
-        //     if (!attri) {
-        //       continue;
-        //     }
-
-        //     void *nested_attribute_value = nla_data(attri);
-        //     std::cout << "Value: " << *(uint32_t *)nested_attribute_value
-        //               << "\n";
-        //   }
-
-        //             // switch (nla_get_u32(bss[NL80211_BSS_STATUS])) {
-        //             // case NL80211_BSS_STATUS_ASSOCIATED:
-        //             //   printf("Connected to %s (on %s)\n", mac_addr, dev);
-        //             //   break;
-        //             // case NL80211_BSS_STATUS_AUTHENTICATED:
-        //             //   printf("Authenticated with %s (on %s)\n", mac_addr,
-        //             dev);
-        //             //   return NL_SKIP;
-        //             // case NL80211_BSS_STATUS_IBSS_JOINED:
-        //             //   printf("Joined IBSS %s (on %s)\n", mac_addr, dev);
-        //             //   break;
-        //             // default:
-        //             //   return NL_SKIP;
 
       default:;
     }

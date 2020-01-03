@@ -79,6 +79,7 @@ static void print_iface(const Interface &iface) {
   print(iface.type_.value_, "interface type");
   print(iface.mac_addr_.value_, "mac addr");
   print(iface.ssid_.value_, "SSID");
+  print(iface.bss_frequency_.value_, "Bss frequency");
 }
 
 class ControlInstance {
@@ -89,8 +90,9 @@ class ControlInstance {
       auto wiphy = std::make_shared<Wiphy>(0);
       auto iface = std::make_shared<Interface>(3);
 
-      std::cout << "Frequency " << iface->bss_frequency_.get() << "\n";
-
+      // iface->get();
+      // print_iface(*iface.get());
+      iface->name_.get();
 
       // print_wiphy(*wiphy.get());
       // wiphy->name_.get();

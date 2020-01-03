@@ -29,7 +29,7 @@ class Property {
                     const Attribute::ValueTypes &value_type,
                     const Nl80211Commands &cmd_get,
                     const Nl80211Commands &cmd_set,
-                    const Attribute *parent = NULL);
+                    const Attribute *parent = nullptr);
 
   // In cases below, query the kernel.
   const T &get();
