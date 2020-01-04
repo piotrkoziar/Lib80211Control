@@ -11,7 +11,7 @@ typedef struct nlattr LibnlAttribute;
 typedef struct NestedAttr {
   struct nlattr **attr;
   struct nla_policy *policy;
-} NestedAttr;
+} Scan;
 
 namespace wiphynlcontrol {
 

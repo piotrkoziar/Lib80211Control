@@ -13,40 +13,40 @@
 namespace wiphynlcontrol {
 
 
-// void link_bss() {
-//   int index = 3;
-//   Attribute attr_arg(&index, NL80211_ATTR_IFINDEX, Attribute::ValueTypes::UINT32, NULL);
-//   const auto arg = std::vector<const Attribute *>{&attr_arg};
-//   NestedAttr bss_attr_val;
-//   auto attr_read = Attribute(&bss_attr_val, NL80211_ATTR_BSS, Attribute::ValueTypes::NESTED, NULL);
-//   const auto read = std::vector<Attribute *>{&attr_read};
+void link_bss() {
+  int index = 3;
+  Attribute attr_arg(&index, NL80211_ATTR_IFINDEX, Attribute::ValueTypes::UINT32, NULL);
+  const auto arg = std::vector<const Attribute *>{&attr_arg};
+  NestedAttr bss_attr_val;
+  auto attr_read = Attribute(&bss_attr_val, NL80211_ATTR_BSS, Attribute::ValueTypes::NESTED, NULL);
+  const auto read = std::vector<Attribute *>{&attr_read};
 
-//   struct nlattr *bss_attr[NL80211_BSS_MAX + 1] = {};
-//   struct nla_policy bss_policy[NL80211_BSS_MAX + 1] = {};
+  // struct nlattr *bss_attr[NL80211_BSS_MAX + 1] = {};
+  // struct nla_policy bss_policy[NL80211_BSS_MAX + 1] = {};
 
-//   bss_policy[NL80211_BSS_TSF] = { type : NLA_U64 };
-//   bss_policy[NL80211_BSS_FREQUENCY] = { type : NLA_U32 };
-//   bss_policy[NL80211_BSS_BSSID] = { };
-//   bss_policy[NL80211_BSS_BEACON_INTERVAL] = { type : NLA_U16 };
-//   bss_policy[NL80211_BSS_CAPABILITY] = { type : NLA_U16 };
-//   bss_policy[NL80211_BSS_INFORMATION_ELEMENTS] = { };
-//   bss_policy[NL80211_BSS_SIGNAL_MBM] = { type : NLA_U32 };
-//   bss_policy[NL80211_BSS_SIGNAL_UNSPEC] = { type : NLA_U8 };
-//   bss_policy[NL80211_BSS_STATUS] = { type : NLA_U32 };
-//   bss_policy[10] = { type : NLA_U32 };
+  // bss_policy[NL80211_BSS_TSF] = { type : NLA_U64 };
+  // bss_policy[NL80211_BSS_FREQUENCY] = { type : NLA_U32 };
+  // bss_policy[NL80211_BSS_BSSID] = { };
+  // bss_policy[NL80211_BSS_BEACON_INTERVAL] = { type : NLA_U16 };
+  // bss_policy[NL80211_BSS_CAPABILITY] = { type : NLA_U16 };
+  // bss_policy[NL80211_BSS_INFORMATION_ELEMENTS] = { };
+  // bss_policy[NL80211_BSS_SIGNAL_MBM] = { type : NLA_U32 };
+  // bss_policy[NL80211_BSS_SIGNAL_UNSPEC] = { type : NLA_U8 };
+  // bss_policy[NL80211_BSS_STATUS] = { type : NLA_U32 };
+  // bss_policy[10] = { type : NLA_U32 };
 
-//   bss_attr_val.attr = &bss_attr[0];
-//   bss_attr_val.policy = &bss_policy[0];
+  // bss_attr_val.attr = &bss_attr[0];
+  // bss_attr_val.policy = &bss_policy[0];
 
-//   ComControl::get_communicator().challenge(NL80211_CMD_GET_SCAN, Message::Flags::DUMP, &arg, &read);
+  ComControl::get_communicator().challenge(NL80211_CMD_TRIGGER_SCAN, Message::Flags::NONE, &arg, &read);
 
-//   Property<NestedAttr> pro(&attr_arg,
-//                             NL80211_ATTR_BSS,
-//                             Attribute::ValueTypes::UINT48,
-//                             NL80211_CMD_GET_SCAN,
-//                             NL80211_CMD_UNSPEC);
+  // Property<NestedAttr> pro(&attr_arg,
+  //                           NL80211_ATTR_BSS,
+  //                           Attribute::ValueTypes::UINT48,
+  //                           NL80211_CMD_GET_SCAN,
+  //                           NL80211_CMD_UNSPEC);
 
-// }
+}
 
 // void station() {
 //     int index = 3;
@@ -90,11 +90,14 @@ class ControlInstance {
       auto wiphy = std::make_shared<Wiphy>(0);
       auto iface = std::make_shared<Interface>(3);
 
-      iface->get();
+
+      // link_bss();
+      // iface->get();
+      ComControl::get_communicator().trigger_scan(iface->index_.value_);
       iface->bss_frequency_.get();
       print_iface(*iface.get());
       // print_wiphy(*wiphy.get());
-      // wiphy->name_.get();
+
       // std::cout << "got name\n";
       // print_wiphy(*wiphy.get());
 
@@ -144,3 +147,4 @@ int main(int argc, char **argv) {
   mynl_base.Main();
   return 0;
 }
+

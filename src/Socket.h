@@ -25,6 +25,7 @@ class Socket {
 
  public:
   void set_callback(const LibnlCallback *cb);
+  void add_membership(const int &group_id);
   LibnlSocket *get_socket() const;
 
  public:

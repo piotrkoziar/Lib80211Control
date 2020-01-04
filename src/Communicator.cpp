@@ -25,6 +25,7 @@ static int error_handler(LibnlSocketAddress *nla,
                          std::string *arg);
 static int ack_handler(LibnlMessage *msg, void *arg);
 static int finish_handler(LibnlMessage *msg, void *arg);
+static int seq_check(struct nl_msg *msg, void *arg);
 
 Communicator::Communicator(const CallbackKind &cb_kind)
     : socket_cb_kind_(cb_kind) {
@@ -72,28 +73,26 @@ void Communicator::set_family_id(LibnlSocket *socket) {
   if ((nl80211_family_id_ = genl_ctrl_resolve(socket, "nl80211")) < 0) {
     throw Exception("Communicator:set_family_id:failed");
   }
+
+  scan_multicast_group_id_ = genl_ctrl_resolve_grp(socket, "nl80211", "scan");
 }
 
-void Communicator::send_and_receive(LibnlSocket *socket,
-                                    LibnlMessage *message,
-                                    const std::vector<Attribute *> *attr_read) {
-  if (!socket || !message) {
-    throw Exception("Communicator:send_and_receive:argument is NULL");
-  }
-
-  // Set up callbacks.
+void Communicator::set_callback_default() {
   int ret = 1;
-  nl_cb_err(callback_,
-            NL_CB_CUSTOM,
+  nl_cb_err(callback_, NL_CB_CUSTOM,
             reinterpret_cast<nl_recvmsg_err_cb_t>(error_handler),
             static_cast<void *>(&error_report_));
   nl_cb_set(callback_, NL_CB_FINISH, NL_CB_CUSTOM, finish_handler, &ret);
   nl_cb_set(callback_, NL_CB_ACK, NL_CB_CUSTOM, ack_handler, &ret);
-  nl_cb_set(callback_,
-            NL_CB_VALID,
-            NL_CB_CUSTOM,
-            reinterpret_cast<nl_recvmsg_msg_cb_t>(get_attributes),
-            const_cast<void *>(static_cast<const void *>(attr_read)));
+}
+
+void Communicator::send_and_receive(LibnlSocket *socket,
+                                    LibnlMessage *message) {
+  if (!socket || !message) {
+    throw Exception("Communicator:send_and_receive:argument is NULL");
+  }
+
+  set_callback_default();
 
   // Send the message
   if (nl_send_auto(socket, message) < 0) {
@@ -257,8 +256,46 @@ void Communicator::challenge(const Nl80211Commands &command,
   }
 
   add_attributes(message->get_message(), attr_arg);
+  nl_cb_set(callback_, NL_CB_VALID, NL_CB_CUSTOM,
+            reinterpret_cast<nl_recvmsg_msg_cb_t>(get_attributes),
+            const_cast<void *>(static_cast<const void *>(attr_read)));
+  send_and_receive(socket->get_socket(), message->get_message());
+}
 
-  send_and_receive(socket->get_socket(), message->get_message(), attr_read);
+void Communicator::trigger_scan(int iface_index) {
+  auto socket  = std::make_unique<Socket>(socket_cb_kind_);
+  auto message = std::make_unique<Message>();
+  socket->add_membership(scan_multicast_group_id_);
+  // Add Netlink header, Generic Netlink header to the message.
+  if (!genlmsg_put(message->get_message(),   // message
+                   NL_AUTO_PORT,             // port (auto)
+                   NL_AUTO_SEQ,              // sequence (auto)
+                   nl80211_family_id_,       // family (nl80211) id
+                   0,                        // user header len
+                   0,                        // message flags
+                   NL80211_CMD_TRIGGER_SCAN, // command
+                   0))                       // interface version
+  {
+    throw Exception("Communicator:trigger_scan:message header adding failed");
+  }
+  // Add attribute to the message.
+  nla_put_u32(message->get_message(), NL80211_ATTR_IFINDEX, iface_index);
+
+  ScanTriggerResult result = ScanTriggerResult::UNSPECIFIED;
+  nl_cb_set(callback_, NL_CB_VALID, NL_CB_CUSTOM,
+            reinterpret_cast<nl_recvmsg_msg_cb_t>(get_scan_trigger_result),
+            &result);
+  nl_cb_set(callback_, NL_CB_SEQ_CHECK, NL_CB_CUSTOM, seq_check, NULL);
+
+  // The error message will be received.
+  send_and_receive(socket->get_socket(), message->get_message());
+
+  // The valid message will be received.
+  while (result == ScanTriggerResult::UNSPECIFIED) {
+    // Get the answer.
+    nl_recvmsgs(socket->get_socket(), callback_);
+  }
+  printf("Scan is done.\n");
 }
 
 void Communicator::set_callback_kind(const CallbackKind &kind) {
@@ -267,6 +304,19 @@ void Communicator::set_callback_kind(const CallbackKind &kind) {
 
 const std::string &Communicator::get_error_report() const {
   return error_report_;
+}
+
+int Communicator::get_scan_trigger_result(LibnlMessage *msg,
+                                          ScanTriggerResult *arg) {
+  LibnlGeMessageHeader *gn_header =
+      static_cast<LibnlGeMessageHeader *>(nlmsg_data(nlmsg_hdr(msg)));
+  if (gn_header->cmd == NL80211_CMD_NEW_SCAN_RESULTS) {
+    *arg = ScanTriggerResult::DONE;
+  } else if (gn_header->cmd == NL80211_CMD_SCAN_ABORTED) {
+    *arg = ScanTriggerResult::ABORTED;
+  }
+
+  return NL_SKIP;
 }
 
 Communicator::~Communicator() { nl_cb_put(callback_); }
@@ -351,6 +401,10 @@ int ack_handler(nl_msg *msg, void *arg) {
 int finish_handler(LibnlMessage *msg, void *arg) {
   *static_cast<int *>(arg) = 0;
   return NL_SKIP;
+}
+int seq_check(struct nl_msg *msg, void *arg)
+{
+    return NL_OK;
 }
 
 }  // namespace wiphynlcontrol
