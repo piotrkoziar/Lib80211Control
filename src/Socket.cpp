@@ -5,7 +5,6 @@
 #include <netlink/socket.h>
 
 #include <cassert>
-#include <iostream>
 
 #include "Exception.h"
 

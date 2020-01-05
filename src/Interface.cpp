@@ -9,11 +9,7 @@ namespace wiphynlcontrol {
 Interface::Interface(const uint32_t &id)
     : Entity(),
       // Nested Properties (private) - they do not store values.
-      bss_(&get_attribute(index_),
-           NL80211_ATTR_BSS,
-           Attribute::ValueTypes::NESTED,
-           NL80211_CMD_UNSPEC,
-           NL80211_CMD_UNSPEC),
+      // Not implemented any yet.
       // Identifier.
       index_(&get_attribute(index_),
              NL80211_ATTR_IFINDEX,
@@ -41,12 +37,11 @@ Interface::Interface(const uint32_t &id)
             Attribute::ValueTypes::STRING,
             NL80211_CMD_GET_INTERFACE,
             NL80211_CMD_SET_INTERFACE),
-      bss_frequency_ (&get_attribute(index_),
-                      static_cast<Nl80211AttributeTypes>(NL80211_BSS_FREQUENCY),
-                      Attribute::ValueTypes::UINT32,
-                      NL80211_CMD_GET_SCAN,
-                      NL80211_CMD_UNSPEC,
-                      &get_attribute(bss_)),
+      scan_ (&get_attribute(index_),
+             NL80211_ATTR_BSS,
+             Attribute::ValueTypes::SCAN,
+             NL80211_CMD_GET_SCAN,
+             NL80211_CMD_UNSPEC),
       all_attrs({&get_attribute(index_),
                  &get_attribute(name_),
                  &get_attribute(type_),

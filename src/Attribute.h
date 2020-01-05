@@ -8,15 +8,17 @@
 typedef enum nl80211_attrs Nl80211AttributeTypes;
 typedef struct nlattr LibnlAttribute;
 
-typedef struct NestedAttr {
-  struct nlattr **attr;
-  struct nla_policy *policy;
-} Scan;
-
 namespace wiphynlcontrol {
 
+typedef struct SSIDInfo {
+  std::string ssid;
+  uint32_t frequency;
+  std::string mac_address;
+  std::string status;
+} SSIDInfo;
+
 struct Attribute {
-  enum class ValueTypes { UINT32, UINT48, STRING, NESTED };
+  enum class ValueTypes { UINT32, UINT48, STRING, NESTED, SCAN };
   void  *value;
   const Nl80211AttributeTypes type;
   const ValueTypes value_type;

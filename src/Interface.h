@@ -1,13 +1,14 @@
 #ifndef WIPHYNLCONTROL_INTERFACE_H_
 #define WIPHYNLCONTROL_INTERFACE_H_
 
-#define IFACE_ATTR_NUM 5
-
 #include <array>
 #include <string>
+#include <vector>
 
 #include "Entity.h"
 #include "Property.h"
+
+#define IFACE_ATTR_NUM 5
 
 namespace wiphynlcontrol {
 
@@ -16,8 +17,7 @@ class Interface : public Entity {
   explicit Interface(const uint32_t &id);
 
  private:
-  Property<char>bss_;
-
+  // Not implemented any nested property yet.
  public:
   Property<uint32_t> index_;
   Property<std::string> name_;
@@ -25,7 +25,7 @@ class Interface : public Entity {
   // mac addr stored as %02x:%02x:%02x:%02x:%02x:%02x string
   Property<std::string> mac_addr_;
   Property<std::string> ssid_;
-  Property<uint32_t> bss_frequency_;
+  Property<std::vector<SSIDInfo>> scan_;
 
  private:
   const std::array<struct Attribute *, IFACE_ATTR_NUM> all_attrs;

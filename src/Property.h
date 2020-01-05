@@ -9,7 +9,6 @@ typedef enum nl80211_commands Nl80211Commands;
 
 namespace wiphynlcontrol {
 
-//  Typename should be std::string or uint32_t.
 template <typename T>
 class Property {
   friend class Entity;

@@ -1,13 +1,13 @@
 #ifndef WIPHYNLCONTROL_WIPHY_H_
 #define WIPHYNLCONTROL_WIPHY_H_
 
-#define WIPHY_ATTR_NUM 2
-
 #include <array>
 #include <string>
 
 #include "Entity.h"
 #include "Property.h"
+
+#define WIPHY_ATTR_NUM 2
 
 namespace wiphynlcontrol {
 

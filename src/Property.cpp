@@ -1,6 +1,7 @@
 #include "Property.h"
 
 #include <string>
+#include <vector>
 
 #include "ComControl.h"
 #include "Exception.h"
@@ -29,8 +30,11 @@ const T &Property<T>::get() {
     ComControl::get_communicator().challenge(cmd_get_, Message::Flags::DUMP,
                                              &attr_args, &attr_read);
   } else {
-  ComControl::get_communicator().challenge(cmd_get_, Message::Flags::NONE,
-                                           &attr_args, &attr_read);
+    ComControl::get_communicator().challenge(cmd_get_, Message::Flags::NONE,
+                                             &attr_args, &attr_read);
+  }
+  if (ComControl::get_global_error_report() != "") {
+    throw Exception("Property:set:error report after challenge call");
   }
   return value_;
 }
@@ -53,6 +57,6 @@ void Property<T>::set(const T &arg) {
 template class Property<uint32_t>;
 template class Property<std::string>;
 template class Property<char>;
-template class Property<NestedAttr>;
+template class Property<std::vector<SSIDInfo>>;
 
 }  // namespace wiphynlcontrol
