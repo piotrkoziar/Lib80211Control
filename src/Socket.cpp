@@ -5,7 +5,6 @@
 #include <netlink/socket.h>
 
 #include <cassert>
-#include <iostream>
 
 #include "Exception.h"
 
@@ -21,20 +20,20 @@ Socket::Socket(const CallbackKind cb_kind) {
     throw Exception("Socket:Socket:genl_connect:exited with non-zero code");
   }
 
-  try {
-    // Set socket fd option NETLINK_EXT_ACK
-    int option_value = 1;
-    if (setsockopt(nl_socket_get_fd(socket_),
-                   SOL_NETLINK,
-                   NETLINK_EXT_ACK,
-                   &option_value,
-                   sizeof(option_value)) < 0) {
-      throw Exception(append_errno_to_str(
-          "Socket:Socket:setsockopt:setting socket option failed : "));
-    }
-  } catch (const std::exception &e) {
-    // TODO do not put to stderror
-    std::cerr << e.what() << '\n';
+  // Set socket fd option NETLINK_EXT_ACK
+  int option_value = 1;
+  if (setsockopt(nl_socket_get_fd(socket_),
+                  SOL_NETLINK,
+                  NETLINK_EXT_ACK,
+                  &option_value,
+                  sizeof(option_value)) < 0) {
+    throw Exception(append_errno_to_str(
+        "Socket:Socket:setsockopt:setting socket option failed : "));
+  }
+
+  if (nl_socket_set_nonblocking(socket_) < 0) {
+    throw Exception(append_errno_to_str(
+        "Socket:Socket:setsockopt:setting socket nonblocking failed : "));
   }
 
   callback_ = nl_cb_alloc(static_cast<LibnlCallbackKind>(cb_kind));
@@ -55,6 +54,10 @@ void Socket::set_callback(const LibnlCallback *cb) {
   }
 
   nl_socket_set_cb(socket_, callback_);
+}
+
+void Socket::add_membership(const int &group_id) {
+  nl_socket_add_membership(socket_, group_id);
 }
 
 LibnlSocket *Socket::get_socket() const { return socket_; }

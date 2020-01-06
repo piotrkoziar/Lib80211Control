@@ -1,10 +1,9 @@
+// Demonstration of Lib80211Control capabilities.
 
 #include <iostream>
 #include <memory>
-#include <variant>
 
 #include "ComControl.h"
-#include "Communicator.h"
 #include "Interface.h"
 #include "Wiphy.h"
 
@@ -19,20 +18,16 @@ static void print(const uint32_t &a, const char *args) {
 }
 
 static void print_wiphy(const Wiphy &wiphy) {
-  print(wiphy.index_.get_value(), "index");
-  print(wiphy.name_.get_value(), "name");
-  // print(*wiphy.bands_, "bands");
-  // print(*wiphy.channel_type_, "channel_type");
-  // print(*wiphy.txq_params_, "txq_params");
-  // print(*wiphy.frequency_, "frequency");
+  print(wiphy.index_.value_, "index");
+  print(wiphy.name_.value_, "name");
 }
 
 static void print_iface(const Interface &iface) {
-  print(iface.index_.get_value(), "index");
-  print(iface.name_.get_value(), "name");
-  print(iface.type_.get_value(), "interface type");
-  print(iface.mac_addr_.get_value(), "mac addr");
-  print(iface.ssid_.get_value(), "SSID");
+  print(iface.index_.value_, "index");
+  print(iface.name_.value_, "name");
+  print(iface.type_.value_, "interface type");
+  print(iface.mac_addr_.value_, "mac addr");
+  print(iface.ssid_.value_, "SSID");
 }
 
 class ControlInstance {
@@ -41,38 +36,36 @@ class ControlInstance {
     try {
       // Test
       auto wiphy = std::make_shared<Wiphy>(0);
-      print_wiphy(*wiphy.get());
-      wiphy->name_.get();
-      std::cout << "got name\n";
-      print_wiphy(*wiphy.get());
+      auto iface = std::make_shared<Interface>(3);
 
       wiphy->get();
       std::cout << "got wiphy\n";
       print_wiphy(*wiphy.get());
 
       std::cout << "\n\n\n";
-      auto iface = std::make_shared<Interface>(4);
 
       iface->mac_addr_.get();
       std::cout << "got mac\n";
-      print_iface(*iface.get());
-
       iface->name_.get();
       std::cout << "got name\n";
-      print_iface(*iface.get());
-
       iface->ssid_.get();
       std::cout << "got ssid\n";
-      print_iface(*iface.get());
-
       iface->type_.get();
       std::cout << "got type\n";
       print_iface(*iface.get());
 
-      auto iface2 = std::make_shared<Interface>(3);
-      iface2->get();
-      std::cout << "got iface\n";
-      print_iface(*iface2.get());
+      std::cout << "Trigger scan\n";
+      ComControl::get_communicator().trigger_scan(iface->index_.value_);
+      iface->scan_.get();
+      for (auto &i : iface->scan_.value_) {
+        std::cout << "freq: " << i.frequency << " | mac_addr: " << i.mac_address
+                  << " | ssid: " << i.ssid;
+        if (i.status != "") {
+          std::cout << " | status: " << i.status;
+        }
+        std::cout << "\n";
+
+      }
 
     } catch (std::exception &e) {
       std::cout << "Exception: " << e.what() << "\n";
@@ -87,6 +80,6 @@ class ControlInstance {
 int main(int argc, char **argv) {
   wiphynlcontrol::ControlInstance mynl_base;
   mynl_base.Main();
-
   return 0;
 }
+

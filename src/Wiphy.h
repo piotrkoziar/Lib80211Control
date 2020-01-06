@@ -1,13 +1,13 @@
 #ifndef WIPHYNLCONTROL_WIPHY_H_
 #define WIPHYNLCONTROL_WIPHY_H_
 
-#define WIPHY_ATTR_NUM 2
-
 #include <array>
 #include <string>
 
 #include "Entity.h"
 #include "Property.h"
+
+#define WIPHY_ATTR_NUM 2
 
 namespace wiphynlcontrol {
 
@@ -25,7 +25,7 @@ class Wiphy : public Entity {
  public:
   void get();
   // Returns identifier. Overloads abstract method from Entity.
-  const uint32_t &get_identifier() const;
+  uint32_t get_identifier() const;
   // Overloads abstract method from Entity.
   void set_identifier(const uint32_t &id);
 };

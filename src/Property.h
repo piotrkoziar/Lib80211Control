@@ -9,10 +9,12 @@ typedef enum nl80211_commands Nl80211Commands;
 
 namespace wiphynlcontrol {
 
-//  Typename should be std::string or uint32_t.
 template <typename T>
 class Property {
   friend class Entity;
+
+ public:
+  T value_;
 
  private:
   Attribute attr_;
@@ -25,10 +27,9 @@ class Property {
                     const Nl80211AttributeTypes &type,
                     const Attribute::ValueTypes &value_type,
                     const Nl80211Commands &cmd_get,
-                    const Nl80211Commands &cmd_set);
+                    const Nl80211Commands &cmd_set,
+                    const Attribute *parent = nullptr);
 
-  const T &get_value() const;
-  void set_value(T val);
   // In cases below, query the kernel.
   const T &get();
   void set(const T &arg);

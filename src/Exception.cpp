@@ -23,6 +23,9 @@ const std::string Exception::err_to_str(const int &code) {
     case -19:
       msg.append("No such device");
       break;
+    case -100:
+      msg.append("Network is down");
+      break;
     default:
       msg.append("Unspecified failure");
       break;
