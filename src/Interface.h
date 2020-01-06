@@ -25,7 +25,7 @@ class Interface : public Entity {
   // mac addr stored as %02x:%02x:%02x:%02x:%02x:%02x string
   Property<std::string> mac_addr_;
   Property<std::string> ssid_;
-  Property<std::vector<SSIDInfo>> scan_;
+  Property<std::vector<BSSInfo>> scan_;
 
  private:
   const std::array<struct Attribute *, IFACE_ATTR_NUM> all_attrs;

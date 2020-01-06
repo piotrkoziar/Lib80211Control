@@ -1,6 +1,7 @@
 #include "Property.h"
 
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 #include "ComControl.h"
@@ -8,6 +9,11 @@
 #include "Message.h"
 
 namespace wiphynlcontrol {
+
+static const std::unordered_set<Nl80211Commands> dump_flag_required = {
+  NL80211_CMD_GET_SCAN,
+  NL80211_CMD_GET_STATION
+};
 
 template <typename T>
 Property<T>::Property(const Attribute *owner_id,
@@ -26,7 +32,7 @@ template <typename T>
 const T &Property<T>::get() {
   const auto attr_args = std::vector<const Attribute *>{owner_identifier_};
   const auto attr_read = std::vector<Attribute *>{&attr_};
-  if (cmd_get_ == NL80211_CMD_GET_SCAN) {  // Scan must have DUMP flag.
+  if (dump_flag_required.count(cmd_get_)) {  // Must have DUMP flag.
     ComControl::get_communicator().challenge(cmd_get_, Message::Flags::DUMP,
                                              &attr_args, &attr_read);
   } else {
@@ -57,6 +63,11 @@ void Property<T>::set(const T &arg) {
 template class Property<uint32_t>;
 template class Property<std::string>;
 template class Property<char>;
-template class Property<std::vector<SSIDInfo>>;
+template class Property<std::vector<BSSInfo>>;
+template class Property<uint64_t>;
+template class Property<uint16_t>;
+template class Property<int8_t>;
+template class Property<bool>;
+template class Property<nested_t>;
 
 }  // namespace wiphynlcontrol

@@ -10,15 +10,29 @@ typedef struct nlattr LibnlAttribute;
 
 namespace wiphynlcontrol {
 
-typedef struct SSIDInfo {
+typedef struct nested_t {} nested_t; // type of attributes that have attributes nested in them.
+// They do not need to contain any value.
+
+typedef struct BSSInfo {
   std::string ssid;
   uint32_t frequency;
-  std::string mac_address;
+  std::string bssid;
   std::string status;
-} SSIDInfo;
+} BSSInfo;
 
 struct Attribute {
-  enum class ValueTypes { UINT32, UINT48, STRING, NESTED, SCAN };
+  enum class ValueTypes {
+    INT8,
+    UINT16,
+    UINT32,
+    UINT48,
+    UINT64,
+    STRING,
+    NESTED,
+    SCAN,
+    FLAG
+  };
+
   void  *value;
   const Nl80211AttributeTypes type;
   const ValueTypes value_type;
