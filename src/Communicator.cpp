@@ -193,6 +193,8 @@ int Communicator::get_attributes(LibnlMessage *msg,
   const Attribute *attr_top;
   std::vector<const Attribute *> attr_vec;
   for (auto &attribute_to_read : *attr_read) {
+    attr_vec.clear();
+
     // Push all parents (from bottom to top) to the vector.
     attr_top = attribute_to_read;
     while (attr_top->parent) {
@@ -222,7 +224,6 @@ int Communicator::get_attributes(LibnlMessage *msg,
             nla_parse_nested(nested_attributes.get(), attribute_type,
                              parent_attributes.get()[attribute_type], NULL);
       }
-
       if (result != 0) {
         return NL_SKIP;
       }
@@ -244,9 +245,22 @@ int Communicator::get_attributes(LibnlMessage *msg,
     if (!present) {
       return NL_SKIP;
     }
-
     BSSInfo info = {};
     switch (attribute_to_read->value_type) {
+      case Attribute::ValueTypes::INT8:
+        if (!attribute_to_read->value) {
+          break;
+        }
+        *static_cast<int8_t *>(attribute_to_read->value) =
+                *static_cast<int8_t *>(attribute_to_read_value);
+        break;
+      case Attribute::ValueTypes::UINT16:
+        if (!attribute_to_read->value) {
+          break;
+        }
+        *static_cast<uint16_t *>(attribute_to_read->value) =
+            *static_cast<uint16_t *>(attribute_to_read_value);
+        break;
       case Attribute::ValueTypes::UINT32:
         if (!attribute_to_read->value) {
           break;
@@ -263,13 +277,26 @@ int Communicator::get_attributes(LibnlMessage *msg,
             *static_cast<std::string *>(attribute_to_read->value),
             attribute_to_read_value);
         break;
-
+      case Attribute::ValueTypes::UINT64:
+        if (!attribute_to_read->value) {
+          break;
+        }
+        *static_cast<uint64_t *>(attribute_to_read->value) =
+            *static_cast<uint64_t *>(attribute_to_read_value);
+        break;
       case Attribute::ValueTypes::STRING:
         if (!attribute_to_read->value) {
           break;
         }
         static_cast<std::string *>(attribute_to_read->value)->assign(
                 static_cast<const char *>(attribute_to_read_value));
+        break;
+      case Attribute::ValueTypes::FLAG:
+        if (!attribute_to_read->value) {
+          break;
+        }
+        *static_cast<bool *>(attribute_to_read->value) =
+            *static_cast<bool *>(attribute_to_read_value);
         break;
       case Attribute::ValueTypes::SCAN:
         if (!attribute_to_read->value) {

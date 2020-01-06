@@ -64,5 +64,10 @@ template class Property<uint32_t>;
 template class Property<std::string>;
 template class Property<char>;
 template class Property<std::vector<BSSInfo>>;
+template class Property<uint64_t>;
+template class Property<uint16_t>;
+template class Property<int8_t>;
+template class Property<bool>;
+template class Property<nested_t>;
 
 }  // namespace wiphynlcontrol
