@@ -245,7 +245,7 @@ int Communicator::get_attributes(LibnlMessage *msg,
       return NL_SKIP;
     }
 
-    SSIDInfo info = {};
+    BSSInfo info = {};
     switch (attribute_to_read->value_type) {
       case Attribute::ValueTypes::UINT32:
         if (!attribute_to_read->value) {
@@ -293,7 +293,7 @@ int Communicator::get_attributes(LibnlMessage *msg,
           info.frequency = nla_get_u32(nested[NL80211_BSS_FREQUENCY]);
         }
         if (nested[NL80211_BSS_BSSID]) {
-          mac_address_to_string(info.mac_address,
+          mac_address_to_string(info.bssid,
                                 nla_data(nested[NL80211_BSS_BSSID]));
         }
         if (nested[NL80211_BSS_STATUS]) {
@@ -314,7 +314,7 @@ int Communicator::get_attributes(LibnlMessage *msg,
               break;
 		      }
     	  }
-        static_cast<std::vector<SSIDInfo> *>(
+        static_cast<std::vector<BSSInfo> *>(
           attribute_to_read->value)->push_back(info);
         break;
       case Attribute::ValueTypes::NESTED:
