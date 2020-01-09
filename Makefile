@@ -36,12 +36,14 @@ OBJECTS1 := $(SOURCES1:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
 
 # rule for mynl
 $(BINDIR)/$(TARGET1): $(OBJECTS1)
+	test -d $(BINDIR) || mkdir $(BINDIR)
 	@echo LINKER
 	@echo $(OBJECTS1)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 # rule for objects (.o)
 $(OBJECTS1):$(OBJDIR)/%.o: $(SRCDIR)/%.cpp $(INCLUDES1)
+	test -d $(OBJDIR) || mkdir $(OBJDIR)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 clean:
@@ -49,3 +51,4 @@ clean:
 
 format:
 	clang-format -i src/*.cpp src/*.h
+
